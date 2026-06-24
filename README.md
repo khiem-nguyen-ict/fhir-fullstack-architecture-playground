@@ -7,7 +7,7 @@
 - [Quick smoke test (curl)](#quick-smoke-test-curl)
 - [License](#license)
 - [What is FHIR?](#what-is-fhir)
-- [How this project demonstrates FHIR](#how-this-project-demonsrates-fhir)
+- [How this project demonstrates FHIR](#how-this-project-demonstrates-fhir)
 
 A small, fully runnable reference stack demonstrating the flow:
 
@@ -112,6 +112,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## What is FHIR?
 FHIR (Fast Healthcare Interoperability Resources) is a standard for exchanging healthcare information electronically.
 It defines how healthcare information can be exchanged between different systems, regardless of how it is stored.
+Learn more at the [official HL7 FHIR documentation](https://hl7.org/fhir/).
 
 ## How this project demonstrates FHIR
 This project demonstrates a common pattern in healthcare applications: a frontend application that communicates with a backend through a Backend-for-Frontend (BFF) layer, which in turn interacts with a service that manages FHIR resources. Specifically, the `patient-service` exposes a FHIR-compliant endpoint (`/fhir/Patient`) that returns patient data in the FHIR JSON format, mimicking a real FHIR server. The BFF (GraphQL) and frontend consume this FHIR-shaped data, illustrating how a real-world application might interact with a FHIR server without the complexity of setting up a full FHIR server.
