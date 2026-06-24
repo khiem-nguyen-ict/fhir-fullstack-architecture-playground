@@ -37,6 +37,8 @@ cd infra
 docker compose up --build
 ```
 
+> **Note:** If you get an error like `failed to connect to the docker API at unix:///Users/apple/.docker/run/docker.sock`, start **Docker Desktop** (Applications → Docker Desktop) and wait for the whale icon to stop animating, then re-run the command.
+
 Then open:
 
 - Frontend: http://localhost:5173
