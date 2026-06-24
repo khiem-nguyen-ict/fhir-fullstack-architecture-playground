@@ -1,5 +1,14 @@
 # FHIR Full-Stack Architecture Playground
 
+## Table of Contents
+- [Components](#components)
+- [Run the full circle demo (Docker)](#run-the-full-circle-demo-docker)
+- [Run each piece locally (no Docker)](#run-each-piece-locally-no-docker)
+- [Quick smoke test (curl)](#quick-smoke-test-curl)
+- [License](#license)
+- [What is FHIR?](#what-is-fhir)
+- [How this project demonstrates FHIR](#how-this-project-demonsrates-fhir)
+
 A small, fully runnable reference stack demonstrating the flow:
 
 ```
@@ -99,3 +108,10 @@ See `docs/architecture.md` for more on how the layers fit together.
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## What is FHIR?
+FHIR (Fast Healthcare Interoperability Resources) is a standard for exchanging healthcare information electronically.
+It defines how healthcare information can be exchanged between different systems, regardless of how it is stored.
+
+## How this project demonstrates FHIR
+This project demonstrates a common pattern in healthcare applications: a frontend application that communicates with a backend through a Backend-for-Frontend (BFF) layer, which in turn interacts with a service that manages FHIR resources. Specifically, the `patient-service` exposes a FHIR-compliant endpoint (`/fhir/Patient`) that returns patient data in the FHIR JSON format, mimicking a real FHIR server. The BFF (GraphQL) and frontend consume this FHIR-shaped data, illustrating how a real-world application might interact with a FHIR server without the complexity of setting up a full FHIR server.
