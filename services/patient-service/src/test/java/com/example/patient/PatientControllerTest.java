@@ -3,6 +3,7 @@ package com.example.patient;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
+import java.util.NoSuchElementException;
 
 class PatientControllerTest {
 
@@ -30,9 +33,15 @@ class PatientControllerTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        patient = new Patient("John", "Doe", "Male", "1980-01-01", "123-456-7890", "john.doe@example.com");
+        patient = new Patient("John", "Doe", "Male", LocalDate.of(1980, 1, 1), "123-456-7890", "john.doe@example.com");
         patient.setId(1L);
-        request = new PatientRequest("John", "Doe", "Male", "1980-01-01", "123-456-7890", "john.doe@example.com");
+        request = new PatientRequest();
+        request.setGivenName("John");
+        request.setFamilyName("Doe");
+        request.setGender("Male");
+        request.setBirthDate(LocalDate.of(1980, 1, 1));
+        request.setPhone("123-456-7890");
+        request.setEmail("john.doe@example.com");
     }
 
     @Test
