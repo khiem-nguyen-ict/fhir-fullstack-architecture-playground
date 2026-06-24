@@ -1,0 +1,26 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: patient-service
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:h2:mem:patients;DB_CLOSE_DELAY=-1}
+    username: ${SPRING_DATASOURCE_USERNAME:fhir}
+    password: ${SPRING_DATASOURCE_PASSWORD:fhir}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: false
+
+  jackson:
+    default-property-inclusion: non_null
+
+logging:
+  level:
+    com.example.patient: INFO
