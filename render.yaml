@@ -1,10 +1,4 @@
 services:
-  - type: database
-    name: fhir-postgres-db
-    databaseName: fhir_db
-    user: fhir_user
-    plan: free
-
   - type: web
     name: patient-service
     env: docker
@@ -24,7 +18,6 @@ services:
         fromDatabase:
           name: fhir-postgres-db
           property: password
-
   - type: web
     name: bff
     env: docker
@@ -36,3 +29,9 @@ services:
         fromService:
           name: patient-service
           property: hostport
+
+databases:
+  - name: fhir-postgres-db
+    databaseName: fhir_db
+    user: fhir_user
+    plan: free
