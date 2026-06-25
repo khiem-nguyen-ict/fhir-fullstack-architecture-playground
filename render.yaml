@@ -6,8 +6,16 @@ services:
     dockerContext: ./services/patient-service/
     plan: free
     envVars:
+      - key: DB_HOST
+        fromDatabase:
+          name: fhir-postgres-db
+          property: host
+      - key: DB_NAME
+        fromDatabase:
+          name: fhir-postgres-db
+          property: databaseName
       - key: SPRING_DATASOURCE_URL
-        value: "jdbc:postgresql://${fhir-postgres-db.hostname}/${fhir-postgres-db.databaseName}"
+        value: "jdbc:postgresql://$(DB_HOST)/$(DB_NAME)"
       - key: SPRING_DATASOURCE_USERNAME
         fromDatabase:
           name: fhir-postgres-db
@@ -36,7 +44,10 @@ services:
     plan: free
     envVars:
       - key: BFF_URL
-        value: https://bff.onrender.com
+        fromService:
+          name: bff
+          property: url
+          type: web
 databases:
   - name: fhir-postgres-db
     databaseName: fhir_db
