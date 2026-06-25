@@ -1,3 +1,5 @@
+debug: true
+
 server:
   port: 8081
 
@@ -23,4 +25,5 @@ spring:
 
 logging:
   level:
-    com.example.patient: INFO
+    org.springframework.core.env: TRACE
+    org.springframework.boot.context.config: TRACE

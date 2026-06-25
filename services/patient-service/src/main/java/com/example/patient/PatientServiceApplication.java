@@ -3,7 +3,6 @@ package com.example.patient;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
 
@@ -11,7 +10,11 @@ import org.springframework.core.env.Environment;
 public class PatientServiceApplication {
 
   public static void main(String[] args) {
-    ConfigurableApplicationContext ctx = SpringApplication.run(PatientServiceApplication.class, args);
+    System.out.println("==== RAW ENV ====");
+    System.out.println("SPRING_DATASOURCE_URL=" + System.getenv("SPRING_DATASOURCE_URL"));
+    System.out.println("=================");
+
+    SpringApplication.run(PatientServiceApplication.class, args);
   }
 
   @Bean
