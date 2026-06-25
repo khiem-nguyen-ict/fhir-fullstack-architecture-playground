@@ -17,7 +17,12 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const server = new ApolloServer({ typeDefs, resolvers });
+const server = new ApolloServer({ 
+  typeDefs, 
+  resolvers,
+  graphiql: true,
+});
+
 await server.start();
 
 app.use(
@@ -31,6 +36,21 @@ const publicDir = join(__dirname, "public");
 if (existsSync(publicDir)) {
   app.use(express.static(publicDir));
 }
+
+app.get("/", (req, res) => {
+  // Serve GraphQL Playground at root if accepting HTML
+  if (req.headers.accept?.includes("text/html")) {
+    res.redirect("/graphql");
+  } else {
+    // fallback to SPA or frontend dev server
+    const indexPath = join(__dirname, "public", "index.html");
+    if (existsSync(indexPath)) {
+      res.sendFile(indexPath);
+    } else {
+      res.redirect("http://localhost:5173");
+    }
+  }
+});
 
 app.get("*", (req, res) => {
   if (!req.path.includes(".")) {
