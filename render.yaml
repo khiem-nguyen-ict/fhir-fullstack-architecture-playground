@@ -13,7 +13,7 @@ services:
       - key: DB_NAME
         fromDatabase:
           name: fhir-postgres-db
-          property: databaseName
+          property: database # Fixed: changed from databaseName to database
       - key: SPRING_DATASOURCE_URL
         value: "jdbc:postgresql://$(DB_HOST)/$(DB_NAME)"
       - key: SPRING_DATASOURCE_USERNAME
@@ -46,7 +46,7 @@ services:
       - key: BFF_URL
         fromService:
           name: bff
-          property: url
+          property: hostport # Fixed: changed from url to hostport
           type: web
 databases:
   - name: fhir-postgres-db
