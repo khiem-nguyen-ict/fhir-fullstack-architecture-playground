@@ -30,7 +30,12 @@ services:
           name: patient-service
           property: hostport
           type: web
-
+  - type: web
+    name: frontend
+    env: docker
+    dockerfilePath: ./frontend/Dockerfile
+    dockerContext: ./frontend/
+    plan: free
 databases:
   - name: fhir-postgres-db
     databaseName: fhir_db
