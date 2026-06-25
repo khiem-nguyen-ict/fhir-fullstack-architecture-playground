@@ -18,7 +18,7 @@ services:
 
       # 2. Render will substitute these inline correctly at build/deploy time
       - key: SPRING_DATASOURCE_URL
-        value: "jdbc:postgresql://${DB_HOST}/${DB_NAME}"
+        value: jdbc:postgresql://${DB_HOST}/${DB_NAME}
 
       - key: SPRING_DATASOURCE_USERNAME
         fromDatabase:
@@ -53,7 +53,7 @@ services:
           property: host
           type: web
       - key: BFF_URL
-        value: "https://${BFF_HOST}.onrender.com"
+        value: https://${BFF_HOST}.onrender.com
 databases:
   - name: fhir-postgres-db
     databaseName: fhir_db
