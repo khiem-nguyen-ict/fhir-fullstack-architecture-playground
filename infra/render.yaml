@@ -8,8 +8,8 @@ services:
     envVars:
       - key: SPRING_DATASOURCE_URL
         fromDatabase:
-          name: fhir-postgres-db
-          property: connectionString
+            name: fhir-postgres-db
+            property: connectionString
       - key: SPRING_DATASOURCE_USERNAME
         fromDatabase:
           name: fhir-postgres-db
@@ -28,9 +28,20 @@ services:
       - key: PATIENT_SERVICE_URL
         fromService:
           name: patient-service
-          property: hostport
+          property: host
           type: web
-
+  - type: web
+    name: frontend
+    env: docker
+    dockerfilePath: ./frontend/Dockerfile
+    dockerContext: ./frontend/
+    plan: free
+    envVars:
+      - key: RENDER_BFF_HOST
+        fromService:
+          name: bff
+          property: host
+          type: web
 databases:
   - name: fhir-postgres-db
     databaseName: fhir_db

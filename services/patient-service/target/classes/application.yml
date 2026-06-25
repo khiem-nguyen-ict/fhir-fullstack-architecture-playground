@@ -5,11 +5,6 @@ spring:
   application:
     name: patient-service
 
-  datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:h2:mem:patients;DB_CLOSE_DELAY=-1}
-    username: ${SPRING_DATASOURCE_USERNAME:fhir}
-    password: ${SPRING_DATASOURCE_PASSWORD:fhir}
-
   jpa:
     hibernate:
       ddl-auto: update

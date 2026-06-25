@@ -45,7 +45,8 @@ services:
     ports:
       - "5173:5173"
     environment:
-      VITE_BFF_URL: http://localhost:4000
+      BFF_URL: http://localhost:4000
+      PORT: 5173
     depends_on:
       - bff
 

@@ -93,7 +93,7 @@ npm run dev
 
 ## Deploy to Render.com
 
-The repo includes a `render.yaml` blueprint that provisions the full stack
+The repo includes an `infra/render.yaml` blueprint that provisions the full stack
 on Render's free tier. In this setup the **frontend is embedded inside the
 BFF** so only two web services plus one managed Postgres are needed.
 
@@ -114,7 +114,7 @@ directory. The BFF then serves the UI and proxies GraphQL requests to
 
 1. Push this repo to GitHub.
 2. In the Render Dashboard, click **New → Blueprint**.
-3. Connect the repo and select the `render.yaml` file at the root.
+3. Connect the repo and select the `infra/render.yaml` file.
 4. Click **Apply** to provision all services.
 
 Render will automatically wire environment variables between services:
