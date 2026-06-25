@@ -9,7 +9,7 @@ services:
       - key: SPRING_DATASOURCE_URL
         fromDatabase:
           name: fhir-postgres-db
-          property: connectionString
+          property: jdbcConnectionString
       - key: SPRING_DATASOURCE_USERNAME
         fromDatabase:
           name: fhir-postgres-db
