@@ -7,9 +7,7 @@ services:
     plan: free
     envVars:
       - key: SPRING_DATASOURCE_URL
-        fromDatabase:
-          name: fhir-postgres-db
-          property: connectionString
+        value: "jdbc:postgresql://${fhir-postgres-db.hostname}/${fhir-postgres-db.databaseName}"
       - key: SPRING_DATASOURCE_USERNAME
         fromDatabase:
           name: fhir-postgres-db
@@ -36,6 +34,9 @@ services:
     dockerfilePath: ./frontend/Dockerfile
     dockerContext: ./frontend/
     plan: free
+    envVars:
+      - key: BFF_URL
+        value: https://bff.onrender.com
 databases:
   - name: fhir-postgres-db
     databaseName: fhir_db
