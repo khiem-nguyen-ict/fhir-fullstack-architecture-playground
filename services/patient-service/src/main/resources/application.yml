@@ -6,7 +6,7 @@ spring:
     name: patient-service
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL}
+    url: jdbc:${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME}
     password: ${SPRING_DATASOURCE_PASSWORD}
 
