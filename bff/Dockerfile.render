@@ -1,0 +1,24 @@
+FROM node:20-alpine AS frontend-build
+WORKDIR /frontend
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm ci
+COPY frontend/ .
+RUN npm run build
+
+FROM node:20-alpine AS bff-build
+WORKDIR /app
+COPY bff/package.json bff/package-lock.json ./
+RUN npm install --omit=dev
+COPY bff/ .
+RUN npm install express cors
+
+FROM node:20-alpine
+WORKDIR /app
+COPY --from=bff-build /app/node_modules ./node_modules
+COPY --from=bff-build /app/index.js ./
+COPY --from=bff-build /app/schema.js ./
+COPY --from=bff-build /app/resolvers.js ./
+COPY --from=bff-build /app/patientServiceClient.js ./
+COPY --from=frontend-build /frontend/dist ./public
+EXPOSE 4000
+CMD ["node", "index.js"]

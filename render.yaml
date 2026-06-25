@@ -1,0 +1,38 @@
+services:
+  - type: database
+    name: fhir-postgres-db
+    databaseName: fhir_db
+    user: fhir_user
+    plan: free
+
+  - type: web
+    name: patient-service
+    env: docker
+    dockerfilePath: ./services/patient-service/Dockerfile
+    dockerContext: .
+    plan: free
+    envVars:
+      - key: SPRING_DATASOURCE_URL
+        fromDatabase:
+          name: fhir-postgres-db
+          property: connectionString
+      - key: SPRING_DATASOURCE_USERNAME
+        fromDatabase:
+          name: fhir-postgres-db
+          property: user
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromDatabase:
+          name: fhir-postgres-db
+          property: password
+
+  - type: web
+    name: bff
+    env: docker
+    dockerfilePath: ./bff/Dockerfile.render
+    dockerContext: .
+    plan: free
+    envVars:
+      - key: PATIENT_SERVICE_URL
+        fromService:
+          name: patient-service
+          property: hostport

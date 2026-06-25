@@ -1,4 +1,4 @@
-const BFF_URL = import.meta.env.VITE_BFF_URL || "http://localhost:4000";
+const BFF_URL = `${import.meta.env.VITE_BFF_URL || window.location.origin}/graphql`;
 
 export async function graphqlRequest(query, variables = {}) {
   const res = await fetch(BFF_URL, {

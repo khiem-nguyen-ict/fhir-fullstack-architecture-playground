@@ -4,6 +4,7 @@
 - [Components](#components)
 - [Run the full circle demo (Docker)](#run-the-full-circle-demo-docker)
 - [Run each piece locally (no Docker)](#run-each-piece-locally-no-docker)
+- [Deploy to Render.com](#deploy-to-rendercom)
 - [Quick smoke test (curl)](#quick-smoke-test-curl)
 - [License](#license)
 - [What is FHIR?](#what-is-fhir)
@@ -33,7 +34,9 @@ shaped like a real FHIR R4 `Patient` resource / `Bundle`.
   `patient-service`'s REST API.
 - **frontend** — React + Vite single-page app. Lists patients, adds new
   ones, and deletes them — all the way through the GraphQL BFF to the
-  Patient Service.
+  Patient Service. In Docker Compose this runs as its own container on
+  port 5173; on Render it is baked into the BFF container (see
+  [Deploy to Render.com](#deploy-to-rendercom)).
 - **infra/docker-compose.yml** — Runs Postgres + all three services
   together for a one-command full-circle demo.
 
@@ -87,6 +90,49 @@ npm install
 npm run dev
 # -> listening on http://localhost:5173
 ```
+
+## Deploy to Render.com
+
+The repo includes a `render.yaml` blueprint that provisions the full stack
+on Render's free tier. In this setup the **frontend is embedded inside the
+BFF** so only two web services plus one managed Postgres are needed.
+
+### What gets created
+
+| Service | Type | Plan |
+|---------|------|------|
+| `fhir-postgres-db` | Managed Postgres | Free |
+| `patient-service` | Web (Docker) | Free |
+| `bff` | Web (Docker, multi-stage build) | Free |
+
+The BFF Dockerfile.render (`bff/Dockerfile.render`) builds the React
+frontend with Vite and copies the static output into the BFF's `public/`
+directory. The BFF then serves the UI and proxies GraphQL requests to
+`patient-service`.
+
+### Deploy
+
+1. Push this repo to GitHub.
+2. In the Render Dashboard, click **New → Blueprint**.
+3. Connect the repo and select the `render.yaml` file at the root.
+4. Click **Apply** to provision all services.
+
+Render will automatically wire environment variables between services:
+- `patient-service` receives its database connection string from
+  `fhir-postgres-db`.
+- `bff` receives `PATIENT_SERVICE_URL` from `patient-service`.
+
+### Live URLs (after deploy)
+
+- Frontend + BFF (served together): `https://<bff-service-name>.onrender.com`
+- Patient Service REST API: `https://<patient-service-name>.onrender.com/api/patients`
+- Patient Service FHIR API: `https://<patient-service-name>.onrender.com/fhir/Patient`
+
+GraphQL is available at `https://<bff-service-name>.onrender.com/graphql`.
+
+> **Note:** Free-tier services on Render spin down after 15 minutes of
+> inactivity. The first request after a spin-down may take 30-60 seconds
+> while the container boots.
 
 ## Quick smoke test (curl)
 
