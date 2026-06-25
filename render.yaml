@@ -3,7 +3,7 @@ services:
     name: patient-service
     env: docker
     dockerfilePath: ./services/patient-service/Dockerfile
-    dockerContext: .
+    dockerContext: ./services/patient-service/
     plan: free
     envVars:
       - key: SPRING_DATASOURCE_URL
@@ -21,8 +21,8 @@ services:
   - type: web
     name: bff
     env: docker
-    dockerfilePath: ./bff/Dockerfile.render
-    dockerContext: .
+    dockerfilePath: ./bff/Dockerfile
+    dockerContext: ./bff/
     plan: free
     envVars:
       - key: PATIENT_SERVICE_URL
