@@ -29,6 +29,7 @@ services:
         fromService:
           name: patient-service
           property: hostport
+          type: web
 
 databases:
   - name: fhir-postgres-db
