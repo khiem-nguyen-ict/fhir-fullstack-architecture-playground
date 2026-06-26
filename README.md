@@ -99,18 +99,20 @@ BFF** so only two web services plus one managed Postgres are needed.
 
 ### What gets created
 
-| Service | Type | Plan |
-|---------|------|------|
-| `fhir-postgres-db` | Managed Postgres | Free |
-| `patient-service` | Web (Docker) | Free |
-| `bff` | Web (Docker, multi-stage build) | Free |
-
-The BFF Dockerfile.render (`bff/Dockerfile.render`) builds the React
-frontend with Vite and copies the static output into the BFF's `public/`
-directory. The BFF then serves the UI and proxies GraphQL requests to
-`patient-service`.
+| Service | Type | Plan | Notes |
+|---------|------|------|-------|
+| `fhir-postgres-db` | Managed Postgres | Free | |
+| `patient-service` | Web (Docker) | Free | |
+| `bff` | Web (Docker, multi-stage) | Free | Serves the UI and proxies GraphQL |
+| `frontend` | Web (Docker) | Free | React + Vite app on port 5173 |
 
 ### Deploy
+
+#### All-in-one (frontend embedded in BFF)
+
+This is the default setup configured in `infra/render.yaml`. The BFF Docker image
+builds the frontend with Vite and serves its static assets alongside the GraphQL
+API.
 
 1. Push this repo to GitHub.
 2. In the Render Dashboard, click **New → Blueprint**.
@@ -121,6 +123,19 @@ Render will automatically wire environment variables between services:
 - `patient-service` receives its database connection string from
   `fhir-postgres-db`.
 - `bff` receives `PATIENT_SERVICE_URL` from `patient-service`.
+
+#### Frontend as standalone service
+
+If you want the frontend on its own URL (e.g. for faster static hosting or
+independent scaling), add a fourth web service in Render:
+
+- **Environment**: Docker
+- **Root Directory**: `frontend`
+- **Dockerfile Path**: `frontend/Dockerfile`
+- **Port**: 5173
+- **Environment Variables**: `VITE_GRAPHQL_URL=https://<bff-service-name>.onrender.com/graphql`
+
+The frontend Dockerfile will serve the built React app via Vite's preview server.
 
 ### Live URLs (after deploy)
 

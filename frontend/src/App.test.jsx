@@ -1,10 +1,19 @@
-import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen, waitFor } from "@testing-library/react";
 import App from "./App.jsx";
 
 describe("App", () => {
-  it("renders the header", () => {
+  beforeEach(() => {
+    window.__BFF_URL__ = "";
+    global.fetch = vi.fn().mockResolvedValue({
+      json: () => Promise.resolve({ data: { patients: [] } }),
+    });
+  });
+
+  it("renders the header", async () => {
     render(<App />);
-    expect(screen.getByText("FHIR Full-Stack Architecture Playground")).toBeDefined();
+    await waitFor(() => {
+      expect(screen.getByText("FHIR Full-Stack Architecture Playground")).toBeDefined();
+    });
   });
 });
