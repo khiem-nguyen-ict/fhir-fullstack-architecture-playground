@@ -6,20 +6,10 @@ services:
     dockerContext: ./services/patient-service/
     plan: free
     envVars:
-      # 1. First, tell Render to fetch the raw db properties into these keys
-      - key: DB_HOST
-        fromDatabase:
-          name: fhir-postgres-db
-          property: host
-      - key: DB_NAME
-        fromDatabase:
-          name: fhir-postgres-db
-          property: database
-
-      # 2. Render will substitute these inline correctly at build/deploy time
       - key: SPRING_DATASOURCE_URL
-        value: jdbc:postgresql://${DB_HOST}/${DB_NAME}
-
+        fromDatabase:
+            name: fhir-postgres-db
+            property: connecttionString
       - key: SPRING_DATASOURCE_USERNAME
         fromDatabase:
           name: fhir-postgres-db
@@ -47,13 +37,11 @@ services:
     dockerContext: ./frontend/
     plan: free
     envVars:
-      - key: BFF_HOST
+      - key: RENDER_BFF_HOST
         fromService:
           name: bff
           property: host
           type: web
-      - key: BFF_URL
-        value: https://${BFF_HOST}.onrender.com
 databases:
   - name: fhir-postgres-db
     databaseName: fhir_db
