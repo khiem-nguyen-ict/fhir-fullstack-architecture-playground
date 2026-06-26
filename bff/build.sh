@@ -7,3 +7,5 @@ if [ -n "$PATIENT_SERVICE_URL" ] && ! echo "$PATIENT_SERVICE_URL" | grep -q '^ht
     echo "Converting PATIENT_SERVICE_URL: $PATIENT_SERVICE_URL -> $CONVERTED_URL"
     export PATIENT_SERVICE_URL="${CONVERTED_URL}"
 fi
+
+exec "$@"

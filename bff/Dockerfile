@@ -6,4 +6,4 @@ COPY . .
 COPY build.sh build.sh
 RUN chmod +x ./build.sh
 EXPOSE 4000
-CMD ["npm", "start"]
+CMD ["./build.sh", "npm", "start"]
