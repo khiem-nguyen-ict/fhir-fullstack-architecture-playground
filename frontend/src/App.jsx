@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { graphqlRequest } from "./graphqlClient.js";
 import PatientForm from "./components/PatientForm.jsx";
 import PatientList from "./components/PatientList.jsx";
