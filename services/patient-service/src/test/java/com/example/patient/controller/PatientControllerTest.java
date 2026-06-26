@@ -1,4 +1,4 @@
-package com.example.patient;
+package com.example.patient.controller;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.example.patient.dto.PatientRequest;
+import com.example.patient.entity.Patient;
+import com.example.patient.repository.PatientRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;

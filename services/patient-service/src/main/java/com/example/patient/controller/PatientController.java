@@ -1,5 +1,9 @@
-package com.example.patient;
+package com.example.patient.controller;
 
+import com.example.patient.entity.Patient;
+import com.example.patient.dto.PatientRequest;
+import com.example.patient.mapper.FhirMapper;
+import com.example.patient.repository.PatientRepository;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
