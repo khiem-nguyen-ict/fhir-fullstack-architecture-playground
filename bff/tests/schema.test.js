@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { typeDefs } from "./schema.js";
+import { typeDefs } from "../src/schema.js";
 
 describe("GraphQL schema", () => {
   it("exports a non-empty typeDefs string", () => {
