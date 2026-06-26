@@ -1,4 +1,6 @@
-package com.example.patient;
+package com.example.patient.mapper;
+
+import com.example.patient.entity.Patient;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

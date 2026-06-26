@@ -1,4 +1,4 @@
-package com.example.patient;
+package com.example.patient.mapper;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
+import com.example.patient.entity.Patient;
 import org.junit.jupiter.api.Test;
 
 class FhirMapperTest {

@@ -1,4 +1,4 @@
-package com.example.patient;
+package com.example.patient.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -11,7 +11,7 @@ import java.time.LocalDate;
 /**
  * Simplified persistence model for a FHIR Patient resource.
  * Only the subset of fields needed for this demo are modeled;
- * {@link FhirMapper} is responsible for translating to/from the
+ * {@link com.example.patient.mapper.FhirMapper} is responsible for translating to/from the
  * actual FHIR "Patient" JSON shape at the API boundary.
  */
 @Entity
