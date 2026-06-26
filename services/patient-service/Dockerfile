@@ -9,5 +9,6 @@ FROM eclipse-temurin:17-jre
 WORKDIR /app
 COPY --from=build /app/target/patient-service-0.0.1.jar app.jar
 COPY build.sh build.sh
+RUN chmod +x ./build.sh
 EXPOSE 8081
 ENTRYPOINT ["./build.sh"]
