@@ -28,7 +28,7 @@ services:
       - key: PATIENT_SERVICE_URL
         fromService:
           name: patient-service
-          property: url
+          property: host
           type: web
   - type: web
     name: frontend
