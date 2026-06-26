@@ -1,3 +1,4 @@
+import React from "react";
 import { graphqlRequest } from "../graphqlClient.js";
 
 const DELETE_PATIENT_MUTATION = `

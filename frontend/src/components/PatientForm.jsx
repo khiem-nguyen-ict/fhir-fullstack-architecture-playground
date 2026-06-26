@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { graphqlRequest } from "../graphqlClient.js";
 
 const CREATE_PATIENT_MUTATION = `
