@@ -147,12 +147,17 @@ GraphQL is available at `https://<bff-service-name>.onrender.com/graphql`.
 
 ## Live Demo Links
 
-- Live Frontend App: https://frontend-sgar.onrender.com/
-- Live GraphQL Endpoint: https://bff-3fpu.onrender.com/graphql
+- Live Patient Service: https://patient-service-lzty.onrender.com
+- Live BFF: https://bff-3fpu.onrender.com
+- Live Frontend App: https://frontend-sgar.onrender.com
 
-> **Note:** Free-tier services on Render spin down after 15 minutes of
-> inactivity. The first request after a spin-down may take 30-60 seconds
-> while the container boots.
+> **Note:** Free-tier services on Render spin down after 15 minutes of inactivity.
+> To run the demo successfully, please start the services in this order:
+> 1. Patient Service: open https://patient-service-lzty.onrender.com
+> 2. BFF: open https://bff-3fpu.onrender.com
+> 3. Frontend App: open https://frontend-sgar.onrender.com
+>
+> Otherwise, the frontend app may be unable to load data.
 
 ## Quick smoke test (curl)
 
