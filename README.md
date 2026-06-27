@@ -145,6 +145,11 @@ The frontend Dockerfile will serve the built React app via Vite's preview server
 
 GraphQL is available at `https://<bff-service-name>.onrender.com/graphql`.
 
+## Live Demo Links
+
+- Live Frontend App: https://frontend-sgar.onrender.com/
+- Live GraphQL Endpoint: https://bff-3fpu.onrender.com/graphql
+
 > **Note:** Free-tier services on Render spin down after 15 minutes of
 > inactivity. The first request after a spin-down may take 30-60 seconds
 > while the container boots.
