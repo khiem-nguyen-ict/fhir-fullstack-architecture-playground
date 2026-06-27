@@ -19,9 +19,20 @@ export const typeDefs = `#graphql
     email: String
   }
 
-  type Query {
+  type PatientPage {
     patients: [Patient!]!
+    totalCount: Int!
+  }
+
+  type PaginationConfig {
+    defaultPageSize: Int!
+    maxPageSize: Int!
+  }
+
+  type Query {
+    patients(offset: Int = 0, limit: Int): PatientPage!
     patient(id: ID!): Patient
+    paginationConfig: PaginationConfig!
   }
 
   type Mutation {

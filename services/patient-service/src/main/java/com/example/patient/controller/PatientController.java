@@ -1,5 +1,7 @@
 package com.example.patient.controller;
 
+import com.example.patient.config.PaginationProperties;
+import com.example.patient.dto.PagedResult;
 import com.example.patient.entity.Patient;
 import com.example.patient.dto.PatientRequest;
 import com.example.patient.mapper.FhirMapper;
@@ -25,14 +27,31 @@ import java.util.NoSuchElementException;
 public class PatientController {
 
     private final PatientRepository repository;
+    private final PaginationProperties paginationProperties;
 
-    public PatientController(PatientRepository repository) {
+    public PatientController(PatientRepository repository, PaginationProperties paginationProperties) {
         this.repository = repository;
+        this.paginationProperties = paginationProperties;
     }
 
     @GetMapping("/api/patients")
-    public List<Patient> listPatients() {
-        return repository.findAll();
+    public PagedResult<Patient> listPatients(
+            @RequestParam(name = "offset", defaultValue = "0") int offset,
+            @RequestParam(name = "limit", required = false) Integer limit) {
+
+        int effectiveLimit = resolveLimit(limit);
+        List<Patient> items = repository.findAll();
+        long total = items.size();
+
+        int fromIndex = Math.min(offset, (int) total);
+        int toIndex = Math.min(fromIndex + effectiveLimit, (int) total);
+
+        return new PagedResult<>(
+                items.subList(fromIndex, toIndex),
+                total,
+                fromIndex,
+                toIndex - fromIndex
+        );
     }
 
     @GetMapping("/api/patients/{id}")
@@ -73,11 +92,33 @@ public class PatientController {
         repository.deleteById(id);
     }
 
+    @GetMapping("/api/config/pagination")
+    public Map<String, Object> getPaginationConfig() {
+        return Map.of(
+                "defaultPageSize", paginationProperties.getDefaultPageSize(),
+                "maxPageSize", paginationProperties.getMaxPageSize()
+        );
+    }
+
     // --- FHIR-shaped read endpoints, mirroring a real FHIR server's surface ---
 
     @GetMapping("/fhir/Patient")
-    public Map<String, Object> searchFhirPatients() {
-        return FhirMapper.toFhirBundle(repository.findAll());
+    public Map<String, Object> searchFhirPatients(
+            @RequestParam(name = "_offset", defaultValue = "0") int offset,
+            @RequestParam(name = "_count", required = false) Integer count,
+            @RequestHeader(value = "X-Forwarded-Prefix", required = false) String forwardedPrefix) {
+
+        int effectiveLimit = resolveLimit(count);
+        String baseUrl = buildBaseUrl(forwardedPrefix);
+
+        List<Patient> all = repository.findAll();
+        long total = all.size();
+
+        int fromIndex = Math.min(offset, (int) total);
+        int toIndex = Math.min(fromIndex + effectiveLimit, (int) total);
+        List<Patient> page = all.subList(fromIndex, toIndex);
+
+        return FhirMapper.toFhirBundle(page, fromIndex, effectiveLimit, total, baseUrl);
     }
 
     @GetMapping("/fhir/Patient/{id}")
@@ -96,5 +137,19 @@ public class PatientController {
     public ResponseEntity<Map<String, Object>> handleNotFound(NoSuchElementException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Map.of("error", ex.getMessage()));
+    }
+
+    private int resolveLimit(Integer requested) {
+        int max = paginationProperties.getMaxPageSize();
+        if (requested == null || requested <= 0) {
+            return paginationProperties.getDefaultPageSize();
+        }
+        return Math.min(requested, max);
+    }
+
+    private String buildBaseUrl(String forwardedPrefix) {
+        String prefix = forwardedPrefix != null && !forwardedPrefix.isBlank() ? forwardedPrefix : "";
+        String host = "http://localhost:8081";
+        return prefix.isBlank() ? host : prefix;
     }
 }

@@ -28,6 +28,7 @@ export default function PatientForm({
 }) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
 
   return (
     <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
@@ -47,14 +48,30 @@ export default function PatientForm({
           ⚠ {error}
         </Box>
       )}
+      {success && (
+        <Box sx={{
+          bgcolor: 'success.light',
+          color: 'success.dark',
+          border: 1,
+          borderColor: 'success.main',
+          p: 2,
+          borderRadius: 1,
+          mb: 2
+        }}>
+          ✓ Patient created successfully
+        </Box>
+      )}
       <Formik
         initialValues={initialValues || emptyForm}
         validationSchema={patientSchema}
-        onSubmit={async (values, { setSubmitting: setFormikSubmitting }) => {
+        onSubmit={async (values, { setSubmitting: setFormikSubmitting, resetForm }) => {
           setSubmitting(true);
           setError(null);
+          setSuccess(false);
           try {
             await onSubmit(values);
+            resetForm();
+            setSuccess(true);
           } catch (err) {
             setError(err.message);
           } finally {

@@ -24,7 +24,7 @@ export default function PatientList({ patients, onPatientDeleted }) {
     }
   }
 
-  if (patients.length === 0) {
+  if (!patients || patients.length === 0) {
     return (
       <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
         <Typography variant="h6" gutterBottom>
@@ -57,7 +57,7 @@ export default function PatientList({ patients, onPatientDeleted }) {
               <TableCell>{p.fullName}</TableCell>
               <TableCell>{p.gender || "—"}</TableCell>
               <TableCell>{formatDate(p.birthDate) || "—"}</TableCell>
-              <TableCell>
+              <TableCell sx={{ maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={p.phone || undefined}>
                 {p.phone ? (
                   <Link href={`tel:${p.phone.replace(/[^+\d]/g, "")}`} underline="hover">
                     {formatPhone(p.phone)}
@@ -66,7 +66,7 @@ export default function PatientList({ patients, onPatientDeleted }) {
                   "—"
                 )}
               </TableCell>
-              <TableCell>
+              <TableCell sx={{ maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={p.email || undefined}>
                 {p.email ? (
                   <Link href={`mailto:${p.email}`} underline="hover">
                     {p.email}
@@ -76,20 +76,22 @@ export default function PatientList({ patients, onPatientDeleted }) {
                 )}
               </TableCell>
               <TableCell>
-                <IconButton 
-                  onClick={() => navigate(`/patients/${p.id}`)}
-                  color="primary"
-                  size="small"
-                >
-                  <EditIcon />
-                </IconButton>
-                <IconButton 
-                  onClick={() => handleDelete(p.id)} 
-                  color="error"
-                  size="small"
-                >
-                  <DeleteIcon />
-                </IconButton>
+                <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                  <IconButton 
+                    onClick={() => navigate(`/patients/${p.id}`)}
+                    color="primary"
+                    size="small"
+                  >
+                    <EditIcon />
+                  </IconButton>
+                  <IconButton 
+                    onClick={() => handleDelete(p.id)} 
+                    color="error"
+                    size="small"
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </span>
               </TableCell>
             </TableRow>
           ))}

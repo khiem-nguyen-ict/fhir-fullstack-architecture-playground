@@ -44,8 +44,14 @@ async function request(path, options = {}) {
 }
 
 export const patientServiceClient = {
-  listPatients: () => request("/api/patients"),
+  listPatients: (offset = 0, limit) => {
+    const qs = new URLSearchParams();
+    qs.set("offset", String(offset));
+    if (limit != null) qs.set("limit", String(limit));
+    return request(`/api/patients?${qs.toString()}`);
+  },
   getPatient: (id) => request(`/api/patients/${id}`),
+  getPaginationConfig: () => request("/api/config/pagination"),
   createPatient: (input) => {
     validatePatientInput(input);
     return request("/api/patients", {

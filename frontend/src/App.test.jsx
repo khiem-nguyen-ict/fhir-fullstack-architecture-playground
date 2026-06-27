@@ -9,7 +9,12 @@ describe("App", () => {
   beforeEach(() => {
     window.__BFF_URL__ = "";
     global.fetch = vi.fn().mockResolvedValue({
-      json: () => Promise.resolve({ data: { patients: [] } }),
+      json: () => Promise.resolve({
+        data: {
+          patients: { patients: [], totalCount: 0 },
+          paginationConfig: { defaultPageSize: 10, maxPageSize: 100 },
+        },
+      }),
     });
   });
 

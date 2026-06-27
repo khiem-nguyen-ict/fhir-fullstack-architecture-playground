@@ -129,16 +129,41 @@ class FhirMapperTest {
         patient2.setId(2L);
 
         List<Patient> patients = List.of(patient1, patient2);
-        Map<String, Object> bundle = FhirMapper.toFhirBundle(patients);
+        Map<String, Object> bundle = FhirMapper.toFhirBundle(patients, 0, 10, 2, "http://localhost:8081");
 
         assertEquals("Bundle", bundle.get("resourceType"));
         assertEquals("searchset", bundle.get("type"));
-        assertEquals(2, bundle.get("total"));
+        assertEquals(2L, bundle.get("total"));
         
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> entries = (List<Map<String, Object>>) bundle.get("entry");
         assertNotNull(entries);
         assertEquals(2, entries.size());
+        
+        // Check links
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> links = (List<Map<String, Object>>) bundle.get("link");
+        assertNotNull(links);
+        assertTrue(links.size() >= 3);
+        
+        boolean foundSelf = false;
+        boolean foundFirst = false;
+        boolean foundLast = false;
+        for (Map<String, Object> link : links) {
+            if ("self".equals(link.get("relation"))) {
+                foundSelf = true;
+                assertEquals("http://localhost:8081/fhir/Patient?_offset=0&_count=10", link.get("url"));
+            }
+            if ("first".equals(link.get("relation"))) {
+                foundFirst = true;
+            }
+            if ("last".equals(link.get("relation"))) {
+                foundLast = true;
+            }
+        }
+        assertTrue(foundSelf, "self link not found");
+        assertTrue(foundFirst, "first link not found");
+        assertTrue(foundLast, "last link not found");
         
         // Check first entry
         Map<String, Object> entry1 = entries.get(0);

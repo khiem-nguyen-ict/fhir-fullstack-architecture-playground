@@ -54,11 +54,17 @@ public final class FhirMapper {
         return resource;
     }
 
-    public static Map<String, Object> toFhirBundle(List<Patient> patients) {
+    public static Map<String, Object> toFhirBundle(
+            List<Patient> patients,
+            int offset,
+            int limit,
+            long total,
+            String baseUrl) {
+
         Map<String, Object> bundle = new LinkedHashMap<>();
         bundle.put("resourceType", "Bundle");
         bundle.put("type", "searchset");
-        bundle.put("total", patients.size());
+        bundle.put("total", total);
 
         List<Map<String, Object>> entries = new ArrayList<>();
         for (Patient patient : patients) {
@@ -67,6 +73,27 @@ public final class FhirMapper {
             entries.add(entry);
         }
         bundle.put("entry", entries);
+
+        List<Map<String, Object>> links = new ArrayList<>();
+        links.add(link("self", baseUrl + "/fhir/Patient?_offset=" + offset + "&_count=" + limit));
+
+        int firstOffset = 0;
+        links.add(link("first", baseUrl + "/fhir/Patient?_offset=" + firstOffset + "&_count=" + limit));
+
+        int lastOffset = (int) Math.max(0, total - limit);
+        links.add(link("last", baseUrl + "/fhir/Patient?_offset=" + lastOffset + "&_count=" + limit));
+
+        if (offset + limit < total) {
+            int nextOffset = offset + limit;
+            links.add(link("next", baseUrl + "/fhir/Patient?_offset=" + nextOffset + "&_count=" + limit));
+        }
+
+        if (offset > 0) {
+            int prevOffset = Math.max(0, offset - limit);
+            links.add(link("prev", baseUrl + "/fhir/Patient?_offset=" + prevOffset + "&_count=" + limit));
+        }
+
+        bundle.put("link", links);
         return bundle;
     }
 
@@ -75,5 +102,12 @@ public final class FhirMapper {
         contactPoint.put("system", system);
         contactPoint.put("value", value);
         return contactPoint;
+    }
+
+    private static Map<String, Object> link(String relation, String url) {
+        Map<String, Object> link = new LinkedHashMap<>();
+        link.put("relation", relation);
+        link.put("url", url);
+        return link;
     }
 }
