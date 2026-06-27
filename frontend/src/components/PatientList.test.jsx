@@ -14,7 +14,7 @@ describe("PatientList", () => {
     expect(screen.getByText("No patients yet.")).toBeDefined();
   });
 
-  it("renders patients table when patients exist", () => {
+  it("renders patients table with clickable phone and email when patients exist", () => {
     const mockPatients = [
       {
         id: "1",
@@ -32,8 +32,31 @@ describe("PatientList", () => {
     );
     expect(screen.getByText("John Doe")).toBeDefined();
     expect(screen.getByText("male")).toBeDefined();
-    expect(screen.getByText("1990-01-01")).toBeDefined();
-    expect(screen.getByText("555-1234")).toBeDefined();
+    expect(screen.getByText("01/01/1990")).toBeDefined();
+    expect(screen.getByText("555 1234")).toBeDefined();
+
+    const phoneLink = screen.getByText("555 1234").closest("a");
+    expect(phoneLink?.getAttribute("href")).toBe("tel:5551234");
+
     expect(screen.getByText("john@example.com")).toBeDefined();
+    const emailLink = screen.getByText("john@example.com").closest("a");
+    expect(emailLink?.getAttribute("href")).toBe("mailto:john@example.com");
+  });
+
+  it("renders em dash when phone or email is missing", () => {
+    const mockPatients = [
+      {
+        id: "1",
+        fullName: "Jane Doe",
+        gender: "female",
+        birthDate: "1985-05-15",
+      },
+    ];
+    render(
+      <BrowserRouter>
+        <PatientList patients={mockPatients} onPatientDeleted={() => {}} />
+      </BrowserRouter>
+    );
+    expect(screen.getAllByText("—").length).toBeGreaterThanOrEqual(2);
   });
 });

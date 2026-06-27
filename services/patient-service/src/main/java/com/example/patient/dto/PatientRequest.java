@@ -1,6 +1,8 @@
 package com.example.patient.dto;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 
 import java.time.LocalDate;
 
@@ -16,8 +18,12 @@ public class PatientRequest {
 
     private LocalDate birthDate;
 
+    @NotBlank(message = "Phone is required")
+    @Pattern(regexp = "^[+]?[\\d\\s\\-()]{7,20}$", message = "Invalid phone number")
     private String phone;
 
+    @NotBlank(message = "Email is required")
+    @Email(message = "Invalid email")
     private String email;
 
     public String getGivenName() {

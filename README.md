@@ -133,7 +133,6 @@ independent scaling), add a fourth web service in Render:
 - **Root Directory**: `frontend`
 - **Dockerfile Path**: `frontend/Dockerfile`
 - **Port**: 5173
-- **Environment Variables**: `VITE_GRAPHQL_URL=https://<bff-service-name>.onrender.com/graphql`
 
 The frontend Dockerfile will serve the built React app via Vite's preview server.
 

@@ -4,7 +4,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 
 import java.time.LocalDate;
 
@@ -31,8 +33,12 @@ public class Patient {
 
     private LocalDate birthDate;
 
+    @NotBlank(message = "Phone is required")
+    @Pattern(regexp = "^[+]?[\\d\\s\\-()]{7,20}$", message = "Invalid phone number")
     private String phone;
 
+    @NotBlank(message = "Email is required")
+    @Email(message = "Invalid email")
     private String email;
 
     public Patient() {
