@@ -20,6 +20,9 @@ dist/
 nbdist/
 .nb-gradle/
 
+# Kilo
+.kilo/
+
 # VS Code
 .vscode/
 
