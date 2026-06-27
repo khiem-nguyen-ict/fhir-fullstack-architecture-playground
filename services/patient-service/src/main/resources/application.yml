@@ -16,6 +16,11 @@ spring:
   jackson:
     default-property-inclusion: non_null
 
+app:
+  pagination:
+    default-page-size: 10
+    max-page-size: 100
+
 logging:
   level:
     com.example.patient: INFO

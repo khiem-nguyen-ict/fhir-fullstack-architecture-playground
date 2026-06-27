@@ -15,13 +15,20 @@ function toGraphPatient(p) {
 }
 
 export const patientQueries = {
-  patients: async () => {
-    const patients = await patientServiceClient.listPatients();
-    return patients.map(toGraphPatient);
+  patients: async (_parent, { offset = 0, limit }) => {
+    const page = await patientServiceClient.listPatients(offset, limit);
+    return {
+      patients: page.items.map(toGraphPatient),
+      totalCount: page.total,
+    };
   },
   patient: async (_parent, { id }) => {
     const patient = await patientServiceClient.getPatient(id);
     return toGraphPatient(patient);
+  },
+  paginationConfig: async () => {
+    const config = await patientServiceClient.getPaginationConfig();
+    return config;
   },
 };
 
