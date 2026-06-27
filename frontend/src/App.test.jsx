@@ -2,6 +2,7 @@ import React from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import { ThemeProvider } from "./context/ThemeContext.jsx";
+import { BrowserRouter } from "react-router-dom";
 import App from "./App.jsx";
 
 describe("App", () => {
@@ -15,7 +16,9 @@ describe("App", () => {
   it("renders the header", async () => {
     render(
       <ThemeProvider>
-        <App />
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
       </ThemeProvider>
     );
     await waitFor(() => {

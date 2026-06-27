@@ -9,15 +9,6 @@ import {
   Typography,
 } from "@mui/material";
 
-const CREATE_PATIENT_MUTATION = `
-  mutation CreatePatient($input: PatientInput!) {
-    createPatient(input: $input) {
-      id
-      fullName
-    }
-  }
-`;
-
 const emptyForm = {
   givenName: "",
   familyName: "",
@@ -27,24 +18,24 @@ const emptyForm = {
   email: "",
 };
 
-export default function PatientForm({ onPatientAdded }) {
-  const [form, setForm] = useState(emptyForm);
+export default function PatientForm({
+  initialValues,
+  onSubmit,
+  submitButtonText,
+  title,
+  onCancel,
+}) {
+  const [form, setForm] = useState(initialValues || emptyForm);
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
 
   async function handleSubmit(e) {
     e.preventDefault();
     setSubmitting(true);
     try {
-      await graphqlRequest(CREATE_PATIENT_MUTATION, {
-        input: {
-          ...form,
-          birthDate: form.birthDate || null,
-        },
-      });
-      setForm(emptyForm);
-      onPatientAdded();
+      await onSubmit(form);
     } catch (err) {
-      console.error(err);
+      setError(err.message);
     } finally {
       setSubmitting(false);
     }
@@ -53,8 +44,21 @@ export default function PatientForm({ onPatientAdded }) {
   return (
     <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
       <Typography variant="h6" gutterBottom>
-        Add Patient
+        {title || "Add Patient"}
       </Typography>
+      {error && (
+        <Box sx={{
+          bgcolor: 'error.light',
+          color: 'error.dark',
+          border: 1,
+          borderColor: 'error.main',
+          p: 2,
+          borderRadius: 1,
+          mb: 2
+        }}>
+          ⚠ {error}
+        </Box>
+      )}
       <Box
         component="form"
         onSubmit={handleSubmit}
@@ -71,6 +75,9 @@ export default function PatientForm({ onPatientAdded }) {
           onChange={(e) => setForm({ ...form, givenName: e.target.value })}
           required
           size="small"
+          slotProps={{
+                inputLabel: { shrink: true },
+            }}
           sx={{ flex: 1, minWidth: 160 }}
         />
         <TextField
@@ -79,6 +86,9 @@ export default function PatientForm({ onPatientAdded }) {
           onChange={(e) => setForm({ ...form, familyName: e.target.value })}
           required
           size="small"
+          slotProps={{
+                inputLabel: { shrink: true },
+            }}
           sx={{ flex: 1, minWidth: 160 }}
         />
         <TextField
@@ -87,6 +97,9 @@ export default function PatientForm({ onPatientAdded }) {
           value={form.gender}
           onChange={(e) => setForm({ ...form, gender: e.target.value })}
           size="small"
+          slotProps={{
+                inputLabel: { shrink: true },
+            }}
           sx={{ flex: 1, minWidth: 120 }}
         >
           <MenuItem value="">Gender</MenuItem>
@@ -96,28 +109,27 @@ export default function PatientForm({ onPatientAdded }) {
           <MenuItem value="unknown">unknown</MenuItem>
         </TextField>
         <TextField
-          type="date"
-          label="Birth date"
-          value={form.birthDate}
-          onChange={(e) => setForm({ ...form, birthDate: e.target.value })}
-          size="small"
-          InputLabelProps={{ shrink: true }}
-          sx={{
-            flex: 1,
-            minWidth: 140,
-            '& input[type="date"]': {
-              color: "transparent",
-            },
-            '& input[type="date"]:focus': {
-              color: "inherit",
-            },
-          }}
-        />
+            type="date"
+            label="Birth date"
+            value={form.birthDate}
+            onChange={(e) => setForm({ ...form, birthDate: e.target.value })}
+            size="small"
+            slotProps={{
+                inputLabel: { shrink: true },
+            }}
+            sx={{
+                flex: 1,
+                minWidth: 140,
+            }}
+            />
         <TextField
           label="Phone"
           value={form.phone}
           onChange={(e) => setForm({ ...form, phone: e.target.value })}
           size="small"
+          slotProps={{
+                inputLabel: { shrink: true },
+            }}
           sx={{ flex: 1, minWidth: 140 }}
         />
         <TextField
@@ -125,6 +137,9 @@ export default function PatientForm({ onPatientAdded }) {
           value={form.email}
           onChange={(e) => setForm({ ...form, email: e.target.value })}
           size="small"
+          slotProps={{
+                inputLabel: { shrink: true },
+            }}
           sx={{ flex: 1, minWidth: 160 }}
         />
         <Button
@@ -133,8 +148,17 @@ export default function PatientForm({ onPatientAdded }) {
           disabled={submitting}
           sx={{ height: 40, px: 2 }}
         >
-          {submitting ? "Saving…" : "Add Patient"}
+          {submitting ? "Saving…" : submitButtonText || "Add Patient"}
         </Button>
+        {onCancel && (
+          <Button
+            variant="outlined"
+            onClick={onCancel}
+            sx={{ height: 40, px: 2 }}
+          >
+            Cancel
+          </Button>
+        )}
       </Box>
     </Paper>
   );
