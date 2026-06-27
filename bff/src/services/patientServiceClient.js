@@ -44,10 +44,12 @@ async function request(path, options = {}) {
 }
 
 export const patientServiceClient = {
-  listPatients: (offset = 0, limit) => {
+  listPatients: (offset = 0, limit, sortBy, sortDirection) => {
     const qs = new URLSearchParams();
     qs.set("offset", String(offset));
     if (limit != null) qs.set("limit", String(limit));
+    if (sortBy != null) qs.set("sortBy", sortBy);
+    if (sortDirection != null) qs.set("sortDirection", sortDirection);
     return request(`/api/patients?${qs.toString()}`);
   },
   getPatient: (id) => request(`/api/patients/${id}`),

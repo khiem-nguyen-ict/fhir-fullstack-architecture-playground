@@ -15,8 +15,8 @@ function toGraphPatient(p) {
 }
 
 export const patientQueries = {
-  patients: async (_parent, { offset = 0, limit }) => {
-    const page = await patientServiceClient.listPatients(offset, limit);
+  patients: async (_parent, { offset = 0, limit, sortBy, sortDirection }) => {
+    const page = await patientServiceClient.listPatients(offset, limit, sortBy, sortDirection);
     return {
       patients: page.items.map(toGraphPatient),
       totalCount: page.total,

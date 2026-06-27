@@ -5,8 +5,8 @@ import PatientList from "../components/PatientList.jsx";
 import { Box, Typography, Pagination, Select, MenuItem, FormControl, InputLabel } from "@mui/material";
 
 const PATIENTS_QUERY = `
-  query Patients($offset: Int!, $limit: Int!) {
-    patients(offset: $offset, limit: $limit) {
+  query Patients($offset: Int!, $limit: Int!, $sortBy: String, $sortDirection: String) {
+    patients(offset: $offset, limit: $limit, sortBy: $sortBy, sortDirection: $sortDirection) {
       patients {
         id
         fullName
@@ -46,30 +46,46 @@ export default function PatientsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [offset, setOffset] = useState(0);
-  const [limit, setLimit] = useState(10);
+  const [limit, setLimit] = useState(() => {
+    const saved = localStorage.getItem("patientPageSize");
+    if (saved) {
+      const parsed = Number(saved);
+      if (!isNaN(parsed) && parsed > 0) return parsed;
+    }
+    return 10;
+  });
   const [defaultPageSize, setDefaultPageSize] = useState(10);
   const [maxPageSize, setMaxPageSize] = useState(100);
   const [listVersion, setListVersion] = useState(0);
+  const [sortBy, setSortBy] = useState("fullName");
+  const [sortDirection, setSortDirection] = useState("asc");
 
   useEffect(() => {
     graphqlRequest(PAGINATION_CONFIG_QUERY)
       .then((data) => {
         setDefaultPageSize(data.paginationConfig.defaultPageSize);
         setMaxPageSize(data.paginationConfig.maxPageSize);
-        setLimit(data.paginationConfig.defaultPageSize);
+        setLimit((prev) => {
+          const saved = localStorage.getItem("patientPageSize");
+          if (saved) {
+            const parsed = Number(saved);
+            if (!isNaN(parsed) && parsed > 0) return parsed;
+          }
+          return data.paginationConfig.defaultPageSize;
+        });
       })
       .catch(() => {});
   }, []);
 
   useEffect(() => {
     loadPatients();
-  }, [offset, limit, listVersion]);
+  }, [offset, limit, sortBy, sortDirection, listVersion]);
 
   async function loadPatients() {
     setLoading(true);
     setError(null);
     try {
-      const data = await graphqlRequest(PATIENTS_QUERY, { offset, limit });
+      const data = await graphqlRequest(PATIENTS_QUERY, { offset, limit, sortBy, sortDirection });
       setPatients(data.patients.patients);
       setTotalCount(data.patients.totalCount);
     } catch (err) {
@@ -97,7 +113,17 @@ export default function PatientsPage() {
   function handlePageSizeChange(event) {
     const newLimit = Number(event.target.value);
     setLimit(newLimit);
+    localStorage.setItem("patientPageSize", newLimit);
     setOffset(0);
+  }
+
+  function handleSort(field) {
+    if (sortBy === field) {
+      setSortDirection(prev => prev === "asc" ? "desc" : "asc");
+    } else {
+      setSortBy(field);
+      setSortDirection("asc");
+    }
   }
 
   const pageCount = Math.max(1, Math.ceil(totalCount / limit));
@@ -141,7 +167,7 @@ export default function PatientsPage() {
       {loading ? (
         <Typography>Loading…</Typography>
       ) : (
-        <PatientList patients={patients} onPatientDeleted={loadPatients} />
+        <PatientList patients={patients} onPatientDeleted={loadPatients} sortBy={sortBy} sortDirection={sortDirection} onSort={handleSort} />
       )}
 
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
