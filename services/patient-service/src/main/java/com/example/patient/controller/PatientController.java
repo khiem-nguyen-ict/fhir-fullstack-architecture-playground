@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -37,11 +39,15 @@ public class PatientController {
     @GetMapping("/api/patients")
     public PagedResult<Patient> listPatients(
             @RequestParam(name = "offset", defaultValue = "0") int offset,
-            @RequestParam(name = "limit", required = false) Integer limit) {
+            @RequestParam(name = "limit", required = false) Integer limit,
+            @RequestParam(name = "sortBy", required = false) String sortBy,
+            @RequestParam(name = "sortDirection", required = false, defaultValue = "asc") String sortDirection) {
 
         int effectiveLimit = resolveLimit(limit);
         List<Patient> items = repository.findAll();
         long total = items.size();
+
+        applySorting(items, sortBy, sortDirection);
 
         int fromIndex = Math.min(offset, (int) total);
         int toIndex = Math.min(fromIndex + effectiveLimit, (int) total);
@@ -151,5 +157,35 @@ public class PatientController {
         String prefix = forwardedPrefix != null && !forwardedPrefix.isBlank() ? forwardedPrefix : "";
         String host = "http://localhost:8081";
         return prefix.isBlank() ? host : prefix;
+    }
+
+    private void applySorting(List<Patient> items, String sortBy, String sortDirection) {
+        if (items == null || items.isEmpty() || sortBy == null || sortBy.isBlank()) {
+            return;
+        }
+
+        boolean ascending = !"desc".equalsIgnoreCase(sortDirection);
+        Comparator<Patient> comparator = switch (sortBy) {
+            case "fullName" -> Comparator.comparing(
+                    p -> (p.getGivenName() != null ? p.getGivenName() : "") + " " + (p.getFamilyName() != null ? p.getFamilyName() : "")
+            );
+            case "givenName" -> Comparator.comparing(p -> p.getGivenName() != null ? p.getGivenName() : "");
+            case "familyName" -> Comparator.comparing(p -> p.getFamilyName() != null ? p.getFamilyName() : "");
+            case "gender" -> Comparator.comparing(p -> p.getGender() != null ? p.getGender() : "");
+            case "birthDate" -> Comparator.comparing(
+                    p -> p.getBirthDate(),
+                    Comparator.nullsFirst(Comparator.naturalOrder())
+            );
+            case "phone" -> Comparator.comparing(p -> p.getPhone() != null ? p.getPhone() : "");
+            case "email" -> Comparator.comparing(p -> p.getEmail() != null ? p.getEmail() : "");
+            default -> null;
+        };
+
+        if (comparator != null) {
+            if (!ascending) {
+                comparator = comparator.reversed();
+            }
+            items.sort(comparator);
+        }
     }
 }

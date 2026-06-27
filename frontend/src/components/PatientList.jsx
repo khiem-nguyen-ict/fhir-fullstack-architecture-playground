@@ -1,6 +1,6 @@
 import React from "react";
 import { graphqlRequest } from "../graphqlClient.js";
-import { Paper, Typography, Table, TableHead, TableBody, TableRow, TableCell, IconButton, Link } from "@mui/material";
+import { Paper, Typography, Table, TableHead, TableBody, TableRow, TableCell, IconButton, Link, TableSortLabel } from "@mui/material";
 import { Delete as DeleteIcon, Edit as EditIcon } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { formatDate } from "../utils/dateFormat.js";
@@ -12,7 +12,21 @@ const DELETE_PATIENT_MUTATION = `
   }
 `;
 
-export default function PatientList({ patients, onPatientDeleted }) {
+function ColumnHeader({ field, label, sortBy, sortDirection, onSort }) {
+  return (
+    <TableCell>
+      <TableSortLabel
+        active={sortBy === field}
+        direction={sortBy === field ? sortDirection : "asc"}
+        onClick={() => onSort && onSort(field)}
+      >
+        {label}
+      </TableSortLabel>
+    </TableCell>
+  );
+}
+
+export default function PatientList({ patients, onPatientDeleted, sortBy, sortDirection, onSort }) {
   const navigate = useNavigate();
 
   async function handleDelete(id) {
@@ -40,17 +54,17 @@ export default function PatientList({ patients, onPatientDeleted }) {
       <Typography variant="h6" gutterBottom>
         Patients
       </Typography>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>Name</TableCell>
-            <TableCell>Gender</TableCell>
-            <TableCell>Birth date</TableCell>
-            <TableCell>Phone</TableCell>
-            <TableCell>Email</TableCell>
-            <TableCell></TableCell>
-          </TableRow>
-        </TableHead>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <ColumnHeader field="fullName" label="Name" sortBy={sortBy} sortDirection={sortDirection} onSort={onSort} />
+              <ColumnHeader field="gender" label="Gender" sortBy={sortBy} sortDirection={sortDirection} onSort={onSort} />
+              <ColumnHeader field="birthDate" label="Birth date" sortBy={sortBy} sortDirection={sortDirection} onSort={onSort} />
+              <ColumnHeader field="phone" label="Phone" sortBy={sortBy} sortDirection={sortDirection} onSort={onSort} />
+              <ColumnHeader field="email" label="Email" sortBy={sortBy} sortDirection={sortDirection} onSort={onSort} />
+              <TableCell></TableCell>
+            </TableRow>
+          </TableHead>
         <TableBody>
           {patients.map((p) => (
             <TableRow key={p.id}>

@@ -56,7 +56,7 @@ class PatientControllerTest {
         when(paginationProperties.getDefaultPageSize()).thenReturn(10);
         when(paginationProperties.getMaxPageSize()).thenReturn(100);
 
-        PagedResult<Patient> result = controller.listPatients(0, null);
+        PagedResult<Patient> result = controller.listPatients(0, null, null, null);
 
         assertEquals(1, result.items().size());
         assertEquals(1, result.total());
@@ -70,7 +70,7 @@ class PatientControllerTest {
         when(paginationProperties.getDefaultPageSize()).thenReturn(10);
         when(paginationProperties.getMaxPageSize()).thenReturn(100);
 
-        PagedResult<Patient> result = controller.listPatients(0, 5);
+        PagedResult<Patient> result = controller.listPatients(0, 5, null, null);
 
         assertEquals(1, result.items().size());
         assertEquals(1, result.total());
@@ -94,7 +94,7 @@ class PatientControllerTest {
         when(paginationProperties.getDefaultPageSize()).thenReturn(10);
         when(paginationProperties.getMaxPageSize()).thenReturn(5);
 
-        PagedResult<Patient> result = controller.listPatients(0, 20);
+        PagedResult<Patient> result = controller.listPatients(0, 20, null, null);
 
         assertEquals(5, result.items().size());
         assertEquals(5, result.limit());
@@ -108,7 +108,7 @@ class PatientControllerTest {
         when(paginationProperties.getDefaultPageSize()).thenReturn(10);
         when(paginationProperties.getMaxPageSize()).thenReturn(100);
 
-        PagedResult<Patient> result = controller.listPatients(10, 5);
+        PagedResult<Patient> result = controller.listPatients(10, 5, null, null);
 
         assertEquals(0, result.items().size());
         assertEquals(1, result.total());
