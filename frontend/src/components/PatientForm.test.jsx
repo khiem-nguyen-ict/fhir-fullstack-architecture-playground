@@ -5,7 +5,7 @@ import PatientForm from "./PatientForm.jsx";
 
 describe("PatientForm", () => {
   it("renders form fields", () => {
-    render(<PatientForm onPatientAdded={() => {}} />);
+    render(<PatientForm onSubmit={() => {}} />);
     expect(screen.getByLabelText(/Given name/)).toBeDefined();
     expect(screen.getByLabelText(/Family name/)).toBeDefined();
     expect(screen.getByRole("combobox", { name: /Gender/ })).toBeDefined();
@@ -14,7 +14,7 @@ describe("PatientForm", () => {
   });
 
   it("renders Add Patient button", () => {
-    render(<PatientForm onPatientAdded={() => {}} />);
+    render(<PatientForm onSubmit={() => {}} />);
     const submitButtons = screen.getAllByRole("button", { name: "Add Patient" });
     const addPatientButton = submitButtons.find((b) => b.type === "submit");
     expect(addPatientButton).toBeDefined();

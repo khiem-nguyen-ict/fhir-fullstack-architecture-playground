@@ -1,7 +1,8 @@
 import React from "react";
 import { graphqlRequest } from "../graphqlClient.js";
 import { Paper, Typography, Table, TableHead, TableBody, TableRow, TableCell, IconButton } from "@mui/material";
-import { Delete as DeleteIcon } from "@mui/icons-material";
+import { Delete as DeleteIcon, Edit as EditIcon } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
 
 const DELETE_PATIENT_MUTATION = `
   mutation DeletePatient($id: ID!) {
@@ -10,6 +11,8 @@ const DELETE_PATIENT_MUTATION = `
 `;
 
 export default function PatientList({ patients, onPatientDeleted }) {
+  const navigate = useNavigate();
+
   async function handleDelete(id) {
     try {
       await graphqlRequest(DELETE_PATIENT_MUTATION, { id });
@@ -55,6 +58,13 @@ export default function PatientList({ patients, onPatientDeleted }) {
               <TableCell>{p.phone || "—"}</TableCell>
               <TableCell>{p.email || "—"}</TableCell>
               <TableCell>
+                <IconButton 
+                  onClick={() => navigate(`/patients/${p.id}`)}
+                  color="primary"
+                  size="small"
+                >
+                  <EditIcon />
+                </IconButton>
                 <IconButton 
                   onClick={() => handleDelete(p.id)} 
                   color="error"
