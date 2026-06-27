@@ -1,6 +1,7 @@
 import React from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
+import { ThemeProvider } from "./context/ThemeContext.jsx";
 import App from "./App.jsx";
 
 describe("App", () => {
@@ -12,7 +13,11 @@ describe("App", () => {
   });
 
   it("renders the header", async () => {
-    render(<App />);
+    render(
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
+    );
     await waitFor(() => {
       expect(screen.getByText("FHIR Full-Stack Architecture Playground")).toBeDefined();
     });

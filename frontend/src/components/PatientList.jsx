@@ -1,5 +1,7 @@
 import React from "react";
 import { graphqlRequest } from "../graphqlClient.js";
+import { Paper, Typography, Table, TableHead, TableBody, TableRow, TableCell, IconButton } from "@mui/material";
+import { Delete as DeleteIcon } from "@mui/icons-material";
 
 const DELETE_PATIENT_MUTATION = `
   mutation DeletePatient($id: ID!) {
@@ -19,44 +21,52 @@ export default function PatientList({ patients, onPatientDeleted }) {
 
   if (patients.length === 0) {
     return (
-      <section className="panel">
-        <h2>Patients</h2>
-        <p>No patients yet.</p>
-      </section>
+      <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
+        <Typography variant="h6" gutterBottom>
+          Patients
+        </Typography>
+        <Typography>No patients yet.</Typography>
+      </Paper>
     );
   }
 
   return (
-    <section className="panel">
-      <h2>Patients</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Gender</th>
-            <th>Birth date</th>
-            <th>Phone</th>
-            <th>Email</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
+    <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
+      <Typography variant="h6" gutterBottom>
+        Patients
+      </Typography>
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell>Name</TableCell>
+            <TableCell>Gender</TableCell>
+            <TableCell>Birth date</TableCell>
+            <TableCell>Phone</TableCell>
+            <TableCell>Email</TableCell>
+            <TableCell></TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
           {patients.map((p) => (
-            <tr key={p.id}>
-              <td>{p.fullName}</td>
-              <td>{p.gender || "—"}</td>
-              <td>{p.birthDate || "—"}</td>
-              <td>{p.phone || "—"}</td>
-              <td>{p.email || "—"}</td>
-              <td>
-                <button onClick={() => handleDelete(p.id)} className="link-button">
-                  Delete
-                </button>
-              </td>
-            </tr>
+            <TableRow key={p.id}>
+              <TableCell>{p.fullName}</TableCell>
+              <TableCell>{p.gender || "—"}</TableCell>
+              <TableCell>{p.birthDate || "—"}</TableCell>
+              <TableCell>{p.phone || "—"}</TableCell>
+              <TableCell>{p.email || "—"}</TableCell>
+              <TableCell>
+                <IconButton 
+                  onClick={() => handleDelete(p.id)} 
+                  color="error"
+                  size="small"
+                >
+                  <DeleteIcon />
+                </IconButton>
+              </TableCell>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
-    </section>
+        </TableBody>
+      </Table>
+    </Paper>
   );
 }

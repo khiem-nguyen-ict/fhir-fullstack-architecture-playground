@@ -6,11 +6,11 @@ import PatientForm from "./PatientForm.jsx";
 describe("PatientForm", () => {
   it("renders form fields", () => {
     render(<PatientForm onPatientAdded={() => {}} />);
-    expect(screen.getByPlaceholderText("Given name")).toBeDefined();
-    expect(screen.getByPlaceholderText("Family name")).toBeDefined();
-    expect(screen.getByText("Gender")).toBeDefined();
-    expect(screen.getByPlaceholderText("Phone")).toBeDefined();
-    expect(screen.getByPlaceholderText("Email")).toBeDefined();
+    expect(screen.getByLabelText(/Given name/)).toBeDefined();
+    expect(screen.getByLabelText(/Family name/)).toBeDefined();
+    expect(screen.getByRole("combobox", { name: /Gender/ })).toBeDefined();
+    expect(screen.getByLabelText("Phone")).toBeDefined();
+    expect(screen.getByLabelText("Email")).toBeDefined();
   });
 
   it("renders Add Patient button", () => {
