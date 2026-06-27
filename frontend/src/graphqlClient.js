@@ -1,4 +1,4 @@
-const BFF_URL = `${window.__BFF_URL__ || window.location.origin}/graphql`;
+const BFF_URL = window.__BFF_URL__ ? `${window.__BFF_URL__}/graphql` : "/graphql";
 
 /**
  * Checks if a string likely contains HTML content

@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { graphqlRequest } from "./graphqlClient.js";
 import PatientForm from "./components/PatientForm.jsx";
 import PatientList from "./components/PatientList.jsx";
+import ThemeToggle from "./components/ThemeToggle.jsx";
+import { Box, Container, Typography, CssBaseline } from "@mui/material";
 
 const PATIENTS_QUERY = `
   query Patients {
@@ -41,21 +43,44 @@ export default function App() {
   }, []);
 
   return (
-    <div className="app">
-      <header>
-        <h1>FHIR Full-Stack Architecture Playground</h1>
-        <p className="subtitle">React → GraphQL BFF → Patient Service → FHIR</p>
-      </header>
+    <Box sx={{ bgcolor: 'background.default', minHeight: '100vh' }}>
+      <CssBaseline />
+      <Container maxWidth="md" sx={{ py: 4 }}>
+        <header>
+          <Typography variant="h4" component="h1" gutterBottom>
+            FHIR Full-Stack Architecture Playground
+          </Typography>
+          <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 3 }}>
+            React → GraphQL BFF → Patient Service → FHIR
+          </Typography>
+        </header>
 
-      {error && <div className="error">⚠ {error}</div>}
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+          <ThemeToggle />
+        </Box>
 
-      <PatientForm onPatientAdded={loadPatients} />
+        {error && (
+          <Box sx={{ 
+            bgcolor: 'error.light', 
+            color: 'error.dark', 
+            border: 1, 
+            borderColor: 'error.main', 
+            p: 2, 
+            borderRadius: 1, 
+            mb: 2 
+          }}>
+            ⚠ {error}
+          </Box>
+        )}
 
-      {loading ? (
-        <p>Loading…</p>
-      ) : (
-        <PatientList patients={patients} onPatientDeleted={loadPatients} />
-      )}
-    </div>
+        <PatientForm onPatientAdded={loadPatients} />
+
+        {loading ? (
+          <Typography>Loading…</Typography>
+        ) : (
+          <PatientList patients={patients} onPatientDeleted={loadPatients} />
+        )}
+      </Container>
+    </Box>
   );
 }
