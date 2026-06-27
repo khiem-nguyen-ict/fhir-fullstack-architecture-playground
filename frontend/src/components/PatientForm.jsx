@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { graphqlRequest } from "../graphqlClient.js";
 import {
   Box,
   TextField,
@@ -8,6 +7,8 @@ import {
   Paper,
   Typography,
 } from "@mui/material";
+import { Formik, Form, Field } from "formik";
+import { patientSchema } from "../utils/validationSchema.js";
 
 const emptyForm = {
   givenName: "",
@@ -25,21 +26,8 @@ export default function PatientForm({
   title,
   onCancel,
 }) {
-  const [form, setForm] = useState(initialValues || emptyForm);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
-
-  async function handleSubmit(e) {
-    e.preventDefault();
-    setSubmitting(true);
-    try {
-      await onSubmit(form);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setSubmitting(false);
-    }
-  }
 
   return (
     <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
@@ -59,107 +47,134 @@ export default function PatientForm({
           ⚠ {error}
         </Box>
       )}
-      <Box
-        component="form"
-        onSubmit={handleSubmit}
-        sx={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: 1.5,
-          alignItems: "flex-end",
+      <Formik
+        initialValues={initialValues || emptyForm}
+        validationSchema={patientSchema}
+        onSubmit={async (values, { setSubmitting: setFormikSubmitting }) => {
+          setSubmitting(true);
+          setError(null);
+          try {
+            await onSubmit(values);
+          } catch (err) {
+            setError(err.message);
+          } finally {
+            setSubmitting(false);
+            setFormikSubmitting(false);
+          }
         }}
       >
-        <TextField
-          label="Given name"
-          value={form.givenName}
-          onChange={(e) => setForm({ ...form, givenName: e.target.value })}
-          required
-          size="small"
-          slotProps={{
-                inputLabel: { shrink: true },
-            }}
-          sx={{ flex: 1, minWidth: 160 }}
-        />
-        <TextField
-          label="Family name"
-          value={form.familyName}
-          onChange={(e) => setForm({ ...form, familyName: e.target.value })}
-          required
-          size="small"
-          slotProps={{
-                inputLabel: { shrink: true },
-            }}
-          sx={{ flex: 1, minWidth: 160 }}
-        />
-        <TextField
-          select
-          label="Gender"
-          value={form.gender}
-          onChange={(e) => setForm({ ...form, gender: e.target.value })}
-          size="small"
-          slotProps={{
-                inputLabel: { shrink: true },
-            }}
-          sx={{ flex: 1, minWidth: 120 }}
-        >
-          <MenuItem value="">Gender</MenuItem>
-          <MenuItem value="male">male</MenuItem>
-          <MenuItem value="female">female</MenuItem>
-          <MenuItem value="other">other</MenuItem>
-          <MenuItem value="unknown">unknown</MenuItem>
-        </TextField>
-        <TextField
-            type="date"
-            label="Birth date"
-            value={form.birthDate}
-            onChange={(e) => setForm({ ...form, birthDate: e.target.value })}
-            size="small"
-            slotProps={{
-                inputLabel: { shrink: true },
-            }}
-            sx={{
-                flex: 1,
-                minWidth: 140,
-            }}
-            />
-        <TextField
-          label="Phone"
-          value={form.phone}
-          onChange={(e) => setForm({ ...form, phone: e.target.value })}
-          size="small"
-          slotProps={{
-                inputLabel: { shrink: true },
-            }}
-          sx={{ flex: 1, minWidth: 140 }}
-        />
-        <TextField
-          label="Email"
-          value={form.email}
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
-          size="small"
-          slotProps={{
-                inputLabel: { shrink: true },
-            }}
-          sx={{ flex: 1, minWidth: 160 }}
-        />
-        <Button
-          type="submit"
-          variant="contained"
-          disabled={submitting}
-          sx={{ height: 40, px: 2 }}
-        >
-          {submitting ? "Saving…" : submitButtonText || "Add Patient"}
-        </Button>
-        {onCancel && (
-          <Button
-            variant="outlined"
-            onClick={onCancel}
-            sx={{ height: 40, px: 2 }}
-          >
-            Cancel
-          </Button>
+        {({ errors, touched }) => (
+          <Form>
+            <Box
+              sx={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 1.5,
+                alignItems: "flex-end",
+              }}
+            >
+              <Field
+                as={TextField}
+                label="Given name"
+                name="givenName"
+                required
+                size="small"
+                slotProps={{
+                  inputLabel: { shrink: true },
+                }}
+                sx={{ flex: 1, minWidth: 160 }}
+                error={touched.givenName && Boolean(errors.givenName)}
+                helperText={touched.givenName && errors.givenName}
+              />
+              <Field
+                as={TextField}
+                label="Family name"
+                name="familyName"
+                required
+                size="small"
+                slotProps={{
+                  inputLabel: { shrink: true },
+                }}
+                sx={{ flex: 1, minWidth: 160 }}
+                error={touched.familyName && Boolean(errors.familyName)}
+                helperText={touched.familyName && errors.familyName}
+              />
+              <Field
+                as={TextField}
+                select
+                label="Gender"
+                name="gender"
+                size="small"
+                slotProps={{
+                  inputLabel: { shrink: true },
+                }}
+                sx={{ flex: 1, minWidth: 120 }}
+              >
+                <MenuItem value="">Gender</MenuItem>
+                <MenuItem value="male">male</MenuItem>
+                <MenuItem value="female">female</MenuItem>
+                <MenuItem value="other">other</MenuItem>
+                <MenuItem value="unknown">unknown</MenuItem>
+              </Field>
+              <Field
+                as={TextField}
+                type="date"
+                label="Birth date"
+                name="birthDate"
+                size="small"
+                slotProps={{
+                  inputLabel: { shrink: true },
+                }}
+                sx={{
+                  flex: 1,
+                  minWidth: 140,
+                }}
+              />
+              <Field
+                as={TextField}
+                label="Phone"
+                name="phone"
+                size="small"
+                slotProps={{
+                  inputLabel: { shrink: true },
+                }}
+                sx={{ flex: 1, minWidth: 140 }}
+                error={touched.phone && Boolean(errors.phone)}
+                helperText={touched.phone && errors.phone}
+              />
+              <Field
+                as={TextField}
+                label="Email"
+                name="email"
+                size="small"
+                slotProps={{
+                  inputLabel: { shrink: true },
+                }}
+                sx={{ flex: 1, minWidth: 160 }}
+                error={touched.email && Boolean(errors.email)}
+                helperText={touched.email && errors.email}
+              />
+              <Button
+                type="submit"
+                variant="contained"
+                disabled={submitting}
+                sx={{ height: 40, px: 2 }}
+              >
+                {submitting ? "Saving…" : submitButtonText || "Add Patient"}
+              </Button>
+              {onCancel && (
+                <Button
+                  variant="outlined"
+                  onClick={onCancel}
+                  sx={{ height: 40, px: 2 }}
+                >
+                  Cancel
+                </Button>
+              )}
+            </Box>
+          </Form>
         )}
-      </Box>
+      </Formik>
     </Paper>
   );
 }

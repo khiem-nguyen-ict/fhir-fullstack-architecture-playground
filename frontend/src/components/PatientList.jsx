@@ -1,8 +1,10 @@
 import React from "react";
 import { graphqlRequest } from "../graphqlClient.js";
-import { Paper, Typography, Table, TableHead, TableBody, TableRow, TableCell, IconButton } from "@mui/material";
+import { Paper, Typography, Table, TableHead, TableBody, TableRow, TableCell, IconButton, Link } from "@mui/material";
 import { Delete as DeleteIcon, Edit as EditIcon } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
+import { formatDate } from "../utils/dateFormat.js";
+import { formatPhone } from "../utils/formatPhone.js";
 
 const DELETE_PATIENT_MUTATION = `
   mutation DeletePatient($id: ID!) {
@@ -54,9 +56,25 @@ export default function PatientList({ patients, onPatientDeleted }) {
             <TableRow key={p.id}>
               <TableCell>{p.fullName}</TableCell>
               <TableCell>{p.gender || "—"}</TableCell>
-              <TableCell>{p.birthDate || "—"}</TableCell>
-              <TableCell>{p.phone || "—"}</TableCell>
-              <TableCell>{p.email || "—"}</TableCell>
+              <TableCell>{formatDate(p.birthDate) || "—"}</TableCell>
+              <TableCell>
+                {p.phone ? (
+                  <Link href={`tel:${p.phone.replace(/[^+\d]/g, "")}`} underline="hover">
+                    {formatPhone(p.phone)}
+                  </Link>
+                ) : (
+                  "—"
+                )}
+              </TableCell>
+              <TableCell>
+                {p.email ? (
+                  <Link href={`mailto:${p.email}`} underline="hover">
+                    {p.email}
+                  </Link>
+                ) : (
+                  "—"
+                )}
+              </TableCell>
               <TableCell>
                 <IconButton 
                   onClick={() => navigate(`/patients/${p.id}`)}
