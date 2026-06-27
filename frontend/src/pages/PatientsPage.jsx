@@ -3,6 +3,7 @@ import { graphqlRequest } from "../graphqlClient.js";
 import PatientForm from "../components/PatientForm.jsx";
 import PatientList from "../components/PatientList.jsx";
 import { Box, Typography, Pagination, Select, MenuItem, FormControl, InputLabel } from "@mui/material";
+import ToastBox from "../components/ToastBox.jsx";
 
 const PATIENTS_QUERY = `
   query Patients($offset: Int!, $limit: Int!, $sortBy: String, $sortDirection: String) {
@@ -132,17 +133,7 @@ export default function PatientsPage() {
   return (
     <Box>
       {error && (
-        <Box sx={{
-          bgcolor: 'error.light',
-          color: 'error.dark',
-          border: 1,
-          borderColor: 'error.main',
-          p: 2,
-          borderRadius: 1,
-          mb: 2
-        }}>
-          ⚠ {error}
-        </Box>
+        <ToastBox type="error" message={error} />
       )}
 
       <PatientForm onSubmit={handleCreate} />

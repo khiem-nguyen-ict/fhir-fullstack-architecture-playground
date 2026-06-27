@@ -9,6 +9,7 @@ import {
 } from "@mui/material";
 import { Formik, Form, Field } from "formik";
 import { patientSchema } from "../utils/validationSchema.js";
+import ToastBox from "./ToastBox.jsx";
 
 const emptyForm = {
   givenName: "",
@@ -36,30 +37,10 @@ export default function PatientForm({
         {title || "Add Patient"}
       </Typography>
       {error && (
-        <Box sx={{
-          bgcolor: 'error.light',
-          color: 'error.dark',
-          border: 1,
-          borderColor: 'error.main',
-          p: 2,
-          borderRadius: 1,
-          mb: 2
-        }}>
-          ⚠ {error}
-        </Box>
+        <ToastBox type="error" message={error} />
       )}
       {success && (
-        <Box sx={{
-          bgcolor: 'success.light',
-          color: 'success.dark',
-          border: 1,
-          borderColor: 'success.main',
-          p: 2,
-          borderRadius: 1,
-          mb: 2
-        }}>
-          ✓ Patient created successfully
-        </Box>
+        <ToastBox type="success" message="Patient created successfully" />
       )}
       <Formik
         initialValues={initialValues || emptyForm}
@@ -72,8 +53,10 @@ export default function PatientForm({
             await onSubmit(values);
             resetForm();
             setSuccess(true);
+            setTimeout(() => setSuccess(false), 3000); // Hide success message after 3 seconds
           } catch (err) {
             setError(err.message);
+            setTimeout(() => setError(null), 3000); // Hide error message after 3 seconds
           } finally {
             setSubmitting(false);
             setFormikSubmitting(false);
