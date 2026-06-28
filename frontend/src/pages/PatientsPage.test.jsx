@@ -89,7 +89,7 @@ describe("PatientsPage", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText("No patients yet.")).toBeDefined();
+      expect(screen.getByText("No patients found.")).toBeDefined();
     });
 
     const paginationButtons = screen.getAllByRole("button");
@@ -115,7 +115,7 @@ describe("PatientsPage", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText("No patients yet.")).toBeDefined();
+      expect(screen.getByText("No patients found.")).toBeDefined();
     });
   });
 
@@ -155,7 +155,7 @@ describe("PatientsPage", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText("No patients yet.")).toBeDefined();
+      expect(screen.getByText("No patients found.")).toBeDefined();
     });
   });
 
@@ -172,7 +172,7 @@ describe("PatientsPage", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText("No patients yet.")).toBeDefined();
+      expect(screen.getByText("No patients found.")).toBeDefined();
     });
 
     fireEvent.click(screen.getByRole("button", { name: "Search" }));
@@ -193,7 +193,7 @@ describe("PatientsPage", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText("No patients yet.")).toBeDefined();
+      expect(screen.getByText("No patients found.")).toBeDefined();
     });
   });
 
@@ -210,7 +210,7 @@ describe("PatientsPage", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText("No patients yet.")).toBeDefined();
+      expect(screen.getByText("No patients found.")).toBeDefined();
     });
   });
 });
