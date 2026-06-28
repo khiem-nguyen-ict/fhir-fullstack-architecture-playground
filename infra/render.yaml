@@ -30,8 +30,6 @@ services:
           name: patient-service
           property: host
           type: web
-      - key: ENABLE_GRAPHIQL
-        value: "true" # For production, turn this variable to false
   - type: web
     name: frontend
     env: docker
