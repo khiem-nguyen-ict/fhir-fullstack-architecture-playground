@@ -73,7 +73,7 @@ export default function PatientSearch({
               sx={{
                 background: "none",
                 border: "none",
-                color: "primary.main",
+                color: "text.primary",
                 cursor: "pointer",
                 fontSize: "inherit",
                 textDecoration: "underline",

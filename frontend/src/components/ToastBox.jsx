@@ -4,27 +4,23 @@ import PropTypes from "prop-types";
 
 const toastConfig = {
   error: {
-    bgcolor: "error.light",
-    color: "error.dark",
-    borderColor: "error.main",
+    bgcolor: "error.main",
+    color: "#ffffff",
     icon: "⚠",
   },
   success: {
-    bgcolor: "success.light",
-    color: "success.dark",
-    borderColor: "success.main",
+    bgcolor: "success.main",
+    color: "#ffffff",
     icon: "✓",
   },
   warning: {
-    bgcolor: "warning.light",
-    color: "warning.dark",
-    borderColor: "warning.main",
+    bgcolor: "warning.main",
+    color: "#ffffff",
     icon: "⚠",
   },
   information: {
-    bgcolor: "info.light",
-    color: "info.dark",
-    borderColor: "info.main",
+    bgcolor: "info.main",
+    color: "#ffffff",
     icon: "ℹ",
   },
 };
@@ -37,8 +33,6 @@ export default function ToastBox({ type, message }) {
       sx={{
         bgcolor: config.bgcolor,
         color: config.color,
-        border: 1,
-        borderColor: config.borderColor,
         p: 1,
         borderRadius: 1,
         mb: 3,

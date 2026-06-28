@@ -117,4 +117,26 @@ describe("PatientForm", () => {
       phone: "+1 (555) 123-4567",
     });
   });
+
+  it("renders cancel button when onCancel provided", () => {
+    render(<PatientForm onSubmit={() => {}} onCancel={() => {}} />);
+    expect(screen.getByRole("button", { name: "Cancel" })).toBeDefined();
+  });
+
+  it("calls onCancel when cancel button is clicked", () => {
+    const mockOnCancel = vi.fn();
+    render(<PatientForm onSubmit={() => {}} onCancel={mockOnCancel} />);
+    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(mockOnCancel).toHaveBeenCalled();
+  });
+
+  it("renders custom title when provided", () => {
+    render(<PatientForm onSubmit={() => {}} title="Edit Patient" />);
+    expect(screen.getByText("Edit Patient")).toBeDefined();
+  });
+
+  it("renders custom submit button text when provided", () => {
+    render(<PatientForm onSubmit={() => {}} submitButtonText="Save Patient" />);
+    expect(screen.getByRole("button", { name: "Save Patient" })).toBeDefined();
+  });
 });
