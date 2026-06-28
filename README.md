@@ -179,14 +179,14 @@ curl "http://localhost:8081/api/patients?filterField=birthDate&filterValue=2024"
 curl http://localhost:8081/fhir/Patient
 
 # GraphQL via the BFF
-curl -X POST http://localhost:4000/ \
-  -H 'Content-Type: application/json' \
-  -d '{"query":"{ patients(search: \"jo\") { totalCount patients { id fullName } } }"}'
+ curl -X POST http://localhost:4000/graphql \
+   -H 'Content-Type: application/json' \
+   -d '{"query":"{ patients(search: \"jo\") { totalCount patients { id fullName } } }"}'
 
-# GraphQL with advanced filtering
-curl -X POST http://localhost:4000/ \
-  -H 'Content-Type: application/json' \
-  -d '{"query":"{ patients(filterField: [\"gender\", \"birthDate\"], filterValue: [\"male\", \"2024\"]) { totalCount patients { id fullName gender birthDate } } }"}'
+ # GraphQL with advanced filtering
+ curl -X POST http://localhost:4000/graphql \
+   -H 'Content-Type: application/json' \
+   -d '{"query":"{ patients(filterField: [\"gender\", \"birthDate\"], filterValue: [\"male\", \"2024\"]) { totalCount patients { id fullName gender birthDate } } }"}'
 ```
 
 See `docs/architecture.md` for more on how the layers fit together.
