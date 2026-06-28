@@ -3,6 +3,34 @@ import fetch from "node-fetch";
 const PATIENT_SERVICE_URL =
   process.env.PATIENT_SERVICE_URL || "http://localhost:8081";
 
+const ALLOWED_SORT_FIELDS = ["id", "givenName", "familyName", "email", "birthDate"];
+const ALLOWED_SORT_DIRECTIONS = ["asc", "desc"];
+const MAX_INPUT_LENGTH = 255;
+
+function sanitizeString(str) {
+  if (typeof str !== "string") return str;
+  return str.replace(/[\x00-\x1F\x7F]/g, "").trim();
+}
+
+function validateInputLengths(input) {
+  const errors = [];
+  if (input.givenName && input.givenName.length > MAX_INPUT_LENGTH) {
+    errors.push("givenName exceeds max length");
+  }
+  if (input.familyName && input.familyName.length > MAX_INPUT_LENGTH) {
+    errors.push("familyName exceeds max length");
+  }
+  if (input.email && input.email.length > MAX_INPUT_LENGTH) {
+    errors.push("email exceeds max length");
+  }
+  if (input.phone && input.phone.length > MAX_INPUT_LENGTH) {
+    errors.push("phone exceeds max length");
+  }
+  if (errors.length > 0) {
+    throw new Error(`Validation failed: ${errors.join(", ")}`);
+  }
+}
+
 export function validatePatientInput(input) {
   const errors = [];
 
@@ -17,6 +45,8 @@ export function validatePatientInput(input) {
   } else if (!/^\+?\d[\d\s\-()]{7,18}\d$/.test(input.phone)) {
     errors.push("Invalid phone number");
   }
+
+  validateInputLengths(input);
 
   if (errors.length > 0) {
     throw new Error(`Validation failed: ${errors.join(", ")}`);
@@ -48,14 +78,18 @@ export const patientServiceClient = {
     const qs = new URLSearchParams();
     qs.set("offset", String(offset));
     if (limit != null) qs.set("limit", String(limit));
-    if (sortBy != null) qs.set("sortBy", sortBy);
-    if (sortDirection != null) qs.set("sortDirection", sortDirection);
-    if (search != null && search.trim() !== "") qs.set("search", search.trim());
+    if (sortBy != null && ALLOWED_SORT_FIELDS.includes(sortBy)) qs.set("sortBy", sortBy);
+    if (sortDirection != null && ALLOWED_SORT_DIRECTIONS.includes(sortDirection)) qs.set("sortDirection", sortDirection);
+    if (search != null && search.trim() !== "") qs.set("search", sanitizeString(search).substring(0, 100));
     if (filterField != null && filterField.length > 0) {
-      filterField.forEach(f => { if (f && f.trim() !== "") qs.append("filterField", f.trim()); });
+      filterField.forEach(f => {
+        if (f && f.trim() !== "" && ALLOWED_SORT_FIELDS.includes(f.trim())) {
+          qs.append("filterField", f.trim());
+        }
+      });
     }
     if (filterValue != null && filterValue.length > 0) {
-      filterValue.forEach(v => { if (v && v.trim() !== "") qs.append("filterValue", v.trim()); });
+      filterValue.forEach(v => { if (v && v.trim() !== "") qs.append("filterValue", sanitizeString(v).substring(0, 255)); });
     }
     return request(`/api/patients?${qs.toString()}`);
   },
