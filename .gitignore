@@ -578,3 +578,4 @@ gen
 # Package lock files
 yarn.lock
 pnpm-lock.yaml
+bff/env.local
