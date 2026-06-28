@@ -177,6 +177,7 @@ export default function PatientsPage() {
       setSortBy(field);
       setSortDirection("asc");
     }
+    setOffset(0);
   }
 
   function handleSearchModeChange(_event, newMode) {
