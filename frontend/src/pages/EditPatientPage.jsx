@@ -75,7 +75,7 @@ export default function EditPatientPage() {
   }
 
   if (loading) {
-    return <Typography>Loading…</Typography>;
+    return <Typography align="center">Loading…</Typography>;
   }
 
   return (
