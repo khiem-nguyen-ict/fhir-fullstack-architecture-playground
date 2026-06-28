@@ -19,6 +19,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.util.NoSuchElementException;
 
@@ -52,11 +56,11 @@ class PatientControllerTest {
 
     @Test
     void testListPatients() {
-        when(repository.findAll()).thenReturn(Arrays.asList(patient));
+        when(repository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(new PageImpl<>(Arrays.asList(patient)));
         when(paginationProperties.getDefaultPageSize()).thenReturn(10);
         when(paginationProperties.getMaxPageSize()).thenReturn(100);
 
-        PagedResult<Patient> result = controller.listPatients(0, null, null, null);
+        PagedResult<Patient> result = controller.listPatients(0, null, null, null, null, null, null);
 
         assertEquals(1, result.items().size());
         assertEquals(1, result.total());
@@ -66,16 +70,101 @@ class PatientControllerTest {
 
     @Test
     void testListPatientsWithLimit() {
-        when(repository.findAll()).thenReturn(Arrays.asList(patient));
+        when(repository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(new PageImpl<>(Arrays.asList(patient)));
         when(paginationProperties.getDefaultPageSize()).thenReturn(10);
         when(paginationProperties.getMaxPageSize()).thenReturn(100);
 
-        PagedResult<Patient> result = controller.listPatients(0, 5, null, null);
+        PagedResult<Patient> result = controller.listPatients(0, 5, null, null, null, null, null);
 
         assertEquals(1, result.items().size());
         assertEquals(1, result.total());
         assertEquals(0, result.offset());
         assertEquals(1, result.limit());
+    }
+
+    @Test
+    void testListPatientsGeneralSearchMatchesName() {
+        Patient patient2 = new Patient("Jane", "Smith", "Female", LocalDate.of(1990, 5, 5), "098-765-4321", "jane.smith@example.com");
+        patient2.setId(2L);
+        when(repository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(new PageImpl<>(Arrays.asList(patient2)));
+        when(paginationProperties.getDefaultPageSize()).thenReturn(10);
+        when(paginationProperties.getMaxPageSize()).thenReturn(100);
+
+        PagedResult<Patient> result = controller.listPatients(0, 10, null, null, "jane", null, null);
+
+        assertEquals(1, result.items().size());
+        assertEquals(1, result.total());
+        assertEquals(patient2, result.items().get(0));
+    }
+
+    @Test
+    void testListPatientsGeneralSearchMatchesEmail() {
+        when(repository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(new PageImpl<>(Arrays.asList(patient)));
+        when(paginationProperties.getDefaultPageSize()).thenReturn(10);
+        when(paginationProperties.getMaxPageSize()).thenReturn(100);
+
+        PagedResult<Patient> result = controller.listPatients(0, 10, null, null, "john.doe", null, null);
+
+        assertEquals(1, result.items().size());
+        assertEquals(1, result.total());
+        assertEquals(patient, result.items().get(0));
+    }
+
+    @Test
+    void testListPatientsGeneralSearchMatchesBirthDate() {
+        Patient patient2 = new Patient("Bob", "Jones", "Male", LocalDate.of(1985, 3, 10), "111-222-3333", "bob.jones@example.com");
+        patient2.setId(2L);
+        when(repository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(new PageImpl<>(Arrays.asList(patient2)));
+        when(paginationProperties.getDefaultPageSize()).thenReturn(10);
+        when(paginationProperties.getMaxPageSize()).thenReturn(100);
+
+        PagedResult<Patient> result = controller.listPatients(0, 10, null, null, "1985", null, null);
+
+        assertEquals(1, result.items().size());
+        assertEquals(1, result.total());
+        assertEquals(patient2, result.items().get(0));
+    }
+
+    @Test
+    void testListPatientsAdvancedSearchByField() {
+        Patient patient2 = new Patient("Jane", "Smith", "Female", LocalDate.of(1990, 5, 5), "098-765-4321", "jane.smith@example.com");
+        patient2.setId(2L);
+        when(repository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(new PageImpl<>(Arrays.asList(patient2)));
+        when(paginationProperties.getDefaultPageSize()).thenReturn(10);
+        when(paginationProperties.getMaxPageSize()).thenReturn(100);
+
+        PagedResult<Patient> result = controller.listPatients(0, 10, null, null, null, Arrays.asList("email"), Arrays.asList("jane.smith@example.com"));
+
+        assertEquals(1, result.items().size());
+        assertEquals(1, result.total());
+        assertEquals(patient2, result.items().get(0));
+    }
+
+    @Test
+    void testListPatientsAdvancedSearchByGender() {
+        Patient patient2 = new Patient("Jane", "Smith", "Female", LocalDate.of(1990, 5, 5), "098-765-4321", "jane.smith@example.com");
+        patient2.setId(2L);
+        when(repository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(new PageImpl<>(Arrays.asList(patient2)));
+        when(paginationProperties.getDefaultPageSize()).thenReturn(10);
+        when(paginationProperties.getMaxPageSize()).thenReturn(100);
+
+        PagedResult<Patient> result = controller.listPatients(0, 10, null, null, null, Arrays.asList("gender"), Arrays.asList("female"));
+
+        assertEquals(1, result.items().size());
+        assertEquals(1, result.total());
+        assertEquals(patient2, result.items().get(0));
+    }
+
+    @Test
+    void testListPatientsSearchNoMatches() {
+        when(repository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(new PageImpl<>(Arrays.asList()));
+        when(paginationProperties.getDefaultPageSize()).thenReturn(10);
+        when(paginationProperties.getMaxPageSize()).thenReturn(100);
+
+        PagedResult<Patient> result = controller.listPatients(0, 10, null, null, "nonexistent", null, null);
+
+        assertEquals(0, result.items().size());
+        assertEquals(0, result.total());
     }
 
     @Test
@@ -90,11 +179,19 @@ class PatientControllerTest {
         patient5.setId(5L);
         Patient patient6 = new Patient("Diana", "Wilson", "Female", LocalDate.of(1995, 11, 25), "000-111-2222", "diana.wilson@example.com");
         patient6.setId(6L);
-        when(repository.findAll()).thenReturn(Arrays.asList(patient, patient2, patient3, patient4, patient5, patient6));
+        List<Patient> all = Arrays.asList(patient, patient2, patient3, patient4, patient5, patient6);
+        when(repository.findAll(any(Specification.class), any(Pageable.class))).thenAnswer(invocation -> {
+            Pageable pageable = invocation.getArgument(1);
+            int pageSize = pageable.getPageSize();
+            int page = pageable.getPageNumber();
+            int from = page * pageSize;
+            int to = Math.min(from + pageSize, all.size());
+            return new PageImpl<>(all.subList(from, to), pageable, all.size());
+        });
         when(paginationProperties.getDefaultPageSize()).thenReturn(10);
         when(paginationProperties.getMaxPageSize()).thenReturn(5);
 
-        PagedResult<Patient> result = controller.listPatients(0, 20, null, null);
+        PagedResult<Patient> result = controller.listPatients(0, 20, null, null, null, null, null);
 
         assertEquals(5, result.items().size());
         assertEquals(5, result.limit());
@@ -104,11 +201,11 @@ class PatientControllerTest {
 
     @Test
     void testListPatientsOffsetBeyondTotal() {
-        when(repository.findAll()).thenReturn(Arrays.asList(patient));
+        when(repository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(new PageImpl<>(Arrays.asList(), PageRequest.of(0, 5), 1));
         when(paginationProperties.getDefaultPageSize()).thenReturn(10);
         when(paginationProperties.getMaxPageSize()).thenReturn(100);
 
-        PagedResult<Patient> result = controller.listPatients(10, 5, null, null);
+        PagedResult<Patient> result = controller.listPatients(10, 5, null, null, null, null, null);
 
         assertEquals(0, result.items().size());
         assertEquals(1, result.total());
@@ -156,7 +253,7 @@ class PatientControllerTest {
 
     @Test
     void testSearchFhirPatients() {
-        when(repository.findAll()).thenReturn(Arrays.asList(patient));
+        when(repository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(new PageImpl<>(Arrays.asList(patient)));
         when(paginationProperties.getDefaultPageSize()).thenReturn(10);
         when(paginationProperties.getMaxPageSize()).thenReturn(100);
 

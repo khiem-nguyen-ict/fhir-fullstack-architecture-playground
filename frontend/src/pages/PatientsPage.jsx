@@ -1,13 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { graphqlRequest } from "../graphqlClient.js";
 import PatientForm from "../components/PatientForm.jsx";
 import PatientList from "../components/PatientList.jsx";
+import PatientSearch from "../components/PatientSearch.jsx";
 import { Box, Typography, Pagination, Select, MenuItem, FormControl, InputLabel } from "@mui/material";
 import ToastBox from "../components/ToastBox.jsx";
 
 const PATIENTS_QUERY = `
-  query Patients($offset: Int!, $limit: Int!, $sortBy: String, $sortDirection: String) {
-    patients(offset: $offset, limit: $limit, sortBy: $sortBy, sortDirection: $sortDirection) {
+  query Patients($offset: Int!, $limit: Int!, $sortBy: String, $sortDirection: String, $search: String, $filterField: [String], $filterValue: [String]) {
+    patients(offset: $offset, limit: $limit, sortBy: $sortBy, sortDirection: $sortDirection, search: $search, filterField: $filterField, filterValue: $filterValue) {
       patients {
         id
         fullName
@@ -61,6 +62,29 @@ export default function PatientsPage() {
   const [sortBy, setSortBy] = useState("fullName");
   const [sortDirection, setSortDirection] = useState("asc");
 
+  const [searchMode, setSearchMode] = useState("general");
+  const [generalSearch, setGeneralSearch] = useState("");
+  const [advancedSearch, setAdvancedSearch] = useState({
+    givenName: "",
+    familyName: "",
+    gender: "",
+    birthDate: "",
+    phone: "",
+    email: "",
+  });
+  const [committedSearch, setCommittedSearch] = useState({
+    mode: "general",
+    generalSearch: "",
+    advancedSearch: {
+      givenName: "",
+      familyName: "",
+      gender: "",
+      birthDate: "",
+      phone: "",
+      email: "",
+    },
+  });
+
   useEffect(() => {
     graphqlRequest(PAGINATION_CONFIG_QUERY)
       .then((data) => {
@@ -78,15 +102,37 @@ export default function PatientsPage() {
       .catch(() => {});
   }, []);
 
-  useEffect(() => {
-    loadPatients();
-  }, [offset, limit, sortBy, sortDirection, listVersion]);
-
-  async function loadPatients() {
+  const loadPatients = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await graphqlRequest(PATIENTS_QUERY, { offset, limit, sortBy, sortDirection });
+      const { mode, generalSearch: search, advancedSearch: adv } = committedSearch;
+      const variables = {
+        offset,
+        limit,
+        sortBy,
+        sortDirection,
+        search: mode === "general" && search.trim() !== "" ? search : undefined,
+        filterField: undefined,
+        filterValue: undefined,
+      };
+
+      if (mode === "advanced") {
+        const fields = [];
+        const values = [];
+        Object.entries(adv).forEach(([field, value]) => {
+          if (value && value.trim() !== "") {
+            fields.push(field);
+            values.push(value.trim());
+          }
+        });
+        if (fields.length > 0) {
+          variables.filterField = fields;
+          variables.filterValue = values;
+        }
+      }
+
+      const data = await graphqlRequest(PATIENTS_QUERY, variables);
       setPatients(data.patients.patients);
       setTotalCount(data.patients.totalCount);
     } catch (err) {
@@ -94,7 +140,13 @@ export default function PatientsPage() {
     } finally {
       setLoading(false);
     }
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- listVersion is intentionally included to trigger reloads
+  }, [offset, limit, sortBy, sortDirection, committedSearch, listVersion]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Standard data-fetching pattern
+    loadPatients();
+  }, [loadPatients]);
 
   async function handleCreate(form) {
     await graphqlRequest(CREATE_PATIENT_MUTATION, {
@@ -127,6 +179,54 @@ export default function PatientsPage() {
     }
   }
 
+  function handleSearchModeChange(_event, newMode) {
+    if (newMode !== null) {
+      setSearchMode(newMode);
+    }
+  }
+
+  function handleGeneralSearchChange(event) {
+    setGeneralSearch(event.target.value);
+  }
+
+  function handleAdvancedSearchChange(field, value) {
+    setAdvancedSearch(prev => ({ ...prev, [field]: value }));
+  }
+
+  function handleClearSearch() {
+    setGeneralSearch("");
+    setAdvancedSearch({
+      givenName: "",
+      familyName: "",
+      gender: "",
+      birthDate: "",
+      phone: "",
+      email: "",
+    });
+    setCommittedSearch({
+      mode: searchMode,
+      generalSearch: "",
+      advancedSearch: {
+        givenName: "",
+        familyName: "",
+        gender: "",
+        birthDate: "",
+        phone: "",
+        email: "",
+      },
+    });
+    setOffset(0);
+  }
+
+  function handleSearchClick() {
+    setCommittedSearch({
+      mode: searchMode,
+      generalSearch,
+      advancedSearch: { ...advancedSearch },
+    });
+    setOffset(0);
+  }
+
   const pageCount = Math.max(1, Math.ceil(totalCount / limit));
   const currentPage = Math.floor(offset / limit) + 1;
 
@@ -137,6 +237,17 @@ export default function PatientsPage() {
       )}
 
       <PatientForm onSubmit={handleCreate} />
+
+      <PatientSearch
+        searchMode={searchMode}
+        onModeChange={handleSearchModeChange}
+        generalSearch={generalSearch}
+        onGeneralSearchChange={handleGeneralSearchChange}
+        advancedSearch={advancedSearch}
+        onAdvancedSearchChange={handleAdvancedSearchChange}
+        onClearSearch={handleClearSearch}
+        onSearch={handleSearchClick}
+      />
 
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mb: 2 }}>
         <FormControl size="small" sx={{ minWidth: 120 }}>

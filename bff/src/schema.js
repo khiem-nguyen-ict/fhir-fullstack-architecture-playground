@@ -30,7 +30,7 @@ export const typeDefs = `#graphql
   }
 
   type Query {
-    patients(offset: Int = 0, limit: Int, sortBy: String, sortDirection: String): PatientPage!
+    patients(offset: Int = 0, limit: Int, sortBy: String, sortDirection: String, search: String, filterField: [String], filterValue: [String]): PatientPage!
     patient(id: ID!): Patient
     paginationConfig: PaginationConfig!
   }

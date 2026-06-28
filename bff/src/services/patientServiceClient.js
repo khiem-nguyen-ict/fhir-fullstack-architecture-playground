@@ -44,12 +44,19 @@ async function request(path, options = {}) {
 }
 
 export const patientServiceClient = {
-  listPatients: (offset = 0, limit, sortBy, sortDirection) => {
+  listPatients: (offset = 0, limit, sortBy, sortDirection, search, filterField, filterValue) => {
     const qs = new URLSearchParams();
     qs.set("offset", String(offset));
     if (limit != null) qs.set("limit", String(limit));
     if (sortBy != null) qs.set("sortBy", sortBy);
     if (sortDirection != null) qs.set("sortDirection", sortDirection);
+    if (search != null && search.trim() !== "") qs.set("search", search.trim());
+    if (filterField != null && filterField.length > 0) {
+      filterField.forEach(f => { if (f && f.trim() !== "") qs.append("filterField", f.trim()); });
+    }
+    if (filterValue != null && filterValue.length > 0) {
+      filterValue.forEach(v => { if (v && v.trim() !== "") qs.append("filterValue", v.trim()); });
+    }
     return request(`/api/patients?${qs.toString()}`);
   },
   getPatient: (id) => request(`/api/patients/${id}`),

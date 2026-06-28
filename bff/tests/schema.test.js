@@ -24,7 +24,7 @@ describe("GraphQL schema", () => {
   });
 
   it("patients query accepts offset and limit args", () => {
-    expect(typeDefs).toContain("patients(offset: Int = 0, limit: Int, sortBy: String, sortDirection: String): PatientPage!");
+    expect(typeDefs).toContain("patients(offset: Int = 0, limit: Int, sortBy: String, sortDirection: String, search: String, filterField: [String], filterValue: [String]): PatientPage!");
   });
 
   it("paginationConfig query exists", () => {
