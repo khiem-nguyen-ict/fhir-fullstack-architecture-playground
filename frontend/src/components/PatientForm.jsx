@@ -36,9 +36,9 @@ export default function PatientForm({
       <Typography variant="h6" gutterBottom>
         {title || "Add Patient"}
       </Typography>
-      {error && <ToastBox type="error" message={error} />}
+      {error && <ToastBox type="error" message={error} onClose={() => setError(null)} />}
       {success && (
-        <ToastBox type="success" message="Patient created successfully" />
+        <ToastBox type="success" message="Patient created successfully" onClose={() => setSuccess(false)} />
       )}
       <Formik
         initialValues={initialValues || emptyForm}
@@ -54,10 +54,8 @@ export default function PatientForm({
             await onSubmit(values);
             resetForm();
             setSuccess(true);
-            setTimeout(() => setSuccess(false), 3000); // Hide success message after 3 seconds
           } catch (err) {
             setError(err.message);
-            setTimeout(() => setError(null), 3000); // Hide error message after 3 seconds
           } finally {
             setSubmitting(false);
             setFormikSubmitting(false);
