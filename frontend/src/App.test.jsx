@@ -18,7 +18,7 @@ describe("App", () => {
     });
   });
 
-  it("renders the header", async () => {
+  it("renders the header with icon", async () => {
     render(
       <ThemeProvider>
         <BrowserRouter>
@@ -29,5 +29,6 @@ describe("App", () => {
     await waitFor(() => {
       expect(screen.getByText("FHIR Full-Stack Architecture Playground")).toBeDefined();
     });
+    expect(screen.getByTestId("MedicalServicesIcon")).toBeDefined();
   });
 });
