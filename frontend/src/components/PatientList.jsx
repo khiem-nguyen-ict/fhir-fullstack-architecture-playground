@@ -45,7 +45,7 @@ export default function PatientList({ patients, onPatientDeleted, sortBy, sortDi
         <Typography variant="h2" gutterBottom>
           Patients
         </Typography>
-        <Typography align="center">No patients yet.</Typography>
+        <Typography align="center">No patients found.</Typography>
       </Paper>
     );
   }
