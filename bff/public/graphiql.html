@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>GraphQL</title>
+  <style>
+    html, body { height: 100%; margin: 0; font-family: ui-sans-serif, system-ui, sans-serif; }
+    #app { display: flex; flex-direction: column; height: 100vh; }
+    header { padding: 8px 12px; background: #333; color: #fff; display: flex; align-items: center; gap: 10px; }
+    header h1 { font-size: 14px; margin: 0; font-weight: 600; }
+    button { background: #f5a623; color: #fff; border: 0; padding: 5px 12px; border-radius: 3px; cursor: pointer; font-size: 13px; }
+    button:active { background: #d48f1a; }
+    #editor { flex: 1; border: none; padding: 12px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 14px; resize: none; outline: none; background: #fafafa; }
+    #result { height: 40%; border-top: 1px solid #ddd; padding: 12px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; overflow: auto; background: #fff; white-space: pre-wrap; word-wrap: break-word; }
+    .error { color: #d32f2f; }
+    .hint { color: #888; font-size: 12px; margin-left: auto; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <header>
+      <h1>GraphQL</h1>
+      <button id="run">&#9654; Run</button>
+      <span class="hint">Ctrl+Enter to run</span>
+    </header>
+    <textarea id="editor" spellcheck="false" placeholder="Write your query here..."></textarea>
+    <pre id="result"></pre>
+  </div>
+  <script>
+    const editor = document.getElementById('editor');
+    const result = document.getElementById('result');
+    const runBtn = document.getElementById('run');
+
+    const defaultQuery = `# Welcome\n# Try running this query:\n\nquery GetPatients {\n  patients(limit: 3) {\n    patients {\n      id\n      givenName\n      familyName\n      gender\n      birthDate\n    }\n    totalCount\n  }\n}`;
+    editor.value = defaultQuery;
+
+    async function runQuery() {
+      const query = editor.value.trim();
+      if (!query) return;
+      result.textContent = 'Running...';
+      try {
+        const res = await fetch('/graphql', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query, variables: {} }),
+        });
+        const data = await res.json();
+        if (data.errors) {
+          result.className = 'error';
+          result.textContent = data.errors.map(e => e.message).join('\n');
+        } else {
+          result.className = '';
+          result.textContent = JSON.stringify(data.data, null, 2);
+        }
+      } catch (err) {
+        result.className = 'error';
+        result.textContent = err.message;
+      }
+    }
+
+    runBtn.addEventListener('click', runQuery);
+    editor.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        runQuery();
+      }
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        const s = editor.selectionStart;
+        const end = editor.selectionEnd;
+        editor.value = editor.value.substring(0, s) + '  ' + editor.value.substring(end);
+        editor.selectionStart = editor.selectionEnd = s + 2;
+      }
+    });
+  </script>
+</body>
+</html>

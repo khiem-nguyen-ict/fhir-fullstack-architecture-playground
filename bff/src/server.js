@@ -21,18 +21,19 @@ const PORT = process.env.PORT || 4000;
 const isProduction = process.env.NODE_ENV === "production";
 const ENABLE_GRAPHIQL = process.env.ENABLE_GRAPHIQL !== "false";
 
+const apolloCspSrcs = [
+  "https://cdn.jsdelivr.net",
+];
+
 const app = express();
 
 app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ENABLE_GRAPHIQL
-        ? ["'self'", "'unsafe-inline'"]
-        : ["'self'"],
-      styleSrc: ENABLE_GRAPHIQL
-        ? ["'self'", "'unsafe-inline'"]
-        : ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'", ...(ENABLE_GRAPHIQL ? ["'unsafe-inline'", ...apolloCspSrcs] : [])],
+      styleSrc: ["'self'", ...(ENABLE_GRAPHIQL ? ["'unsafe-inline'", ...apolloCspSrcs] : [])],
+      connectSrc: ["'self'", ...(ENABLE_GRAPHIQL ? [...apolloCspSrcs, "http://localhost:*"] : [])],
     },
   },
   xssFilter: true,
@@ -62,7 +63,7 @@ const queryRateLimiter = rateLimit({
 const server = new ApolloServer({
   typeDefs,
   resolvers,
-  graphiql: !isProduction && ENABLE_GRAPHIQL,
+  introspection: !isProduction,
   plugins: [
     {
       requestDidStart: async () => ({
@@ -83,6 +84,12 @@ const server = new ApolloServer({
 });
 
 await server.start();
+
+if (ENABLE_GRAPHIQL) {
+  app.get("/graphql", (req, res) => {
+    res.sendFile(join(__dirname, "..", "public", "graphiql.html"));
+  });
+}
 
 app.use(
   "/graphql",
