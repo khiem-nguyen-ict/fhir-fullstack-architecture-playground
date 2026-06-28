@@ -163,7 +163,7 @@ public class PatientController {
         Sort.Direction direction = "desc".equalsIgnoreCase(sortDirection) ? Sort.Direction.DESC : Sort.Direction.ASC;
 
         return switch (sortBy) {
-            case "fullName" -> Sort.by(direction, "givenName").ascending().and(Sort.by(direction, "familyName"));
+            case "fullName" -> Sort.by(direction, "givenName").and(Sort.by(direction, "familyName"));
             case "givenName" -> Sort.by(direction, "givenName");
             case "familyName" -> Sort.by(direction, "familyName");
             case "gender" -> Sort.by(direction, "gender");

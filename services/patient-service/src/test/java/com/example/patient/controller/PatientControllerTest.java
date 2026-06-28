@@ -288,4 +288,34 @@ class PatientControllerTest {
         assertEquals(10, config.get("defaultPageSize"));
         assertEquals(100, config.get("maxPageSize"));
     }
+
+    @Test
+    void testListPatientsSortByFullNameAsc() {
+        when(repository.findAll(any(Specification.class), any(Pageable.class))).thenAnswer(invocation -> {
+            Pageable pageable = invocation.getArgument(1);
+            String sortStr = pageable.getSort().toString();
+            assertTrue(sortStr.contains("givenName") && sortStr.contains("ASC"), "Sort should contain givenName ASC");
+            assertTrue(sortStr.contains("familyName"), "Sort should contain familyName");
+            return new PageImpl<>(Arrays.asList(patient));
+        });
+        when(paginationProperties.getDefaultPageSize()).thenReturn(10);
+        when(paginationProperties.getMaxPageSize()).thenReturn(100);
+
+        controller.listPatients(0, 10, "fullName", "asc", null, null, null);
+    }
+
+    @Test
+    void testListPatientsSortByFullNameDesc() {
+        when(repository.findAll(any(Specification.class), any(Pageable.class))).thenAnswer(invocation -> {
+            Pageable pageable = invocation.getArgument(1);
+            String sortStr = pageable.getSort().toString();
+            assertTrue(sortStr.contains("givenName") && sortStr.contains("DESC"), "Sort should contain givenName DESC");
+            assertTrue(sortStr.contains("familyName"), "Sort should contain familyName");
+            return new PageImpl<>(Arrays.asList(patient));
+        });
+        when(paginationProperties.getDefaultPageSize()).thenReturn(10);
+        when(paginationProperties.getMaxPageSize()).thenReturn(100);
+
+        controller.listPatients(0, 10, "fullName", "desc", null, null, null);
+    }
 }
