@@ -36,7 +36,7 @@ describe("patientQueries", () => {
 
     const result = await patientQueries.patients(null, { offset: 0, limit: 10 });
 
-    expect(patientServiceClient.listPatients).toHaveBeenCalledWith(0, 10, undefined, undefined);
+    expect(patientServiceClient.listPatients).toHaveBeenCalledWith(0, 10, undefined, undefined, undefined, undefined, undefined);
     expect(result.patients).toHaveLength(1);
     expect(result.totalCount).toBe(1);
   });
@@ -46,7 +46,15 @@ describe("patientQueries", () => {
 
     await patientQueries.patients(null, {});
 
-    expect(patientServiceClient.listPatients).toHaveBeenCalledWith(0, undefined, undefined, undefined);
+    expect(patientServiceClient.listPatients).toHaveBeenCalledWith(0, undefined, undefined, undefined, undefined, undefined, undefined);
+  });
+
+  it("patients forwards search params", async () => {
+    patientServiceClient.listPatients.mockResolvedValue({ items: [], total: 0 });
+
+    await patientQueries.patients(null, { offset: 0, limit: 10, search: "john", filterField: ["givenName"], filterValue: ["john"] });
+
+    expect(patientServiceClient.listPatients).toHaveBeenCalledWith(0, 10, undefined, undefined, "john", ["givenName"], ["john"]);
   });
 
   it("paginationConfig returns config from service client", async () => {

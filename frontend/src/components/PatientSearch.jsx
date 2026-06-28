@@ -1,0 +1,113 @@
+import React from "react";
+import { Box, TextField, ToggleButton, ToggleButtonGroup, Button, Grid } from "@mui/material";
+import { Search as SearchIcon } from "@mui/icons-material";
+import PropTypes from "prop-types";
+
+const ADVANCED_FIELDS = [
+  { key: "givenName", label: "Given name" },
+  { key: "familyName", label: "Family name" },
+  { key: "gender", label: "Gender" },
+  { key: "birthDate", label: "Birth date" },
+  { key: "phone", label: "Phone" },
+  { key: "email", label: "Email" },
+];
+
+export default function PatientSearch({
+  searchMode,
+  onModeChange,
+  generalSearch,
+  onGeneralSearchChange,
+  advancedSearch,
+  onAdvancedSearchChange,
+  onClearSearch,
+  onSearch,
+}) {
+  return (
+    <Box sx={{ mb: 2 }}>
+      <ToggleButtonGroup
+        exclusive
+        value={searchMode}
+        onChange={onModeChange}
+        size="small"
+        sx={{ mb: 1 }}
+      >
+        <ToggleButton value="general">General</ToggleButton>
+        <ToggleButton value="advanced">Advanced</ToggleButton>
+      </ToggleButtonGroup>
+
+      {searchMode === "general" ? (
+        <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+          <TextField
+            size="small"
+            placeholder="Search by name, email, phone, gender, or birth date..."
+            value={generalSearch}
+            onChange={onGeneralSearchChange}
+            InputProps={{
+              startAdornment: <SearchIcon sx={{ mr: 1, color: "text.secondary" }} />,
+            }}
+            sx={{ flex: 1 }}
+          />
+          <Button variant="contained" onClick={onSearch} size="small">
+            Search
+          </Button>
+        </Box>
+      ) : (
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5}}>
+          <Grid container spacing={1.5}>
+            {ADVANCED_FIELDS.map(({ key, label }) => (
+              <Grid item xs={12} md={6} lg={3} key={key}>
+                <TextField
+                  size="small"
+                  fullWidth
+                  label={label}
+                  value={advancedSearch[key]}
+                  onChange={(e) => onAdvancedSearchChange(key, e.target.value)}
+                />
+              </Grid>
+            ))}
+          </Grid>
+          <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+            <Box
+              component="button"
+              onClick={onClearSearch}
+              sx={{
+                background: "none",
+                border: "none",
+                color: "primary.main",
+                cursor: "pointer",
+                fontSize: "inherit",
+                textDecoration: "underline",
+                px: 0,
+                py: 0.5,
+              }}
+            >
+              Clear search
+            </Box>
+            <Box sx={{ flex: 1 }} />
+            <Button variant="contained" onClick={onSearch} size="small">
+              Search
+            </Button>
+          </Box>
+        </Box>
+      )}
+    </Box>
+  );
+}
+
+PatientSearch.propTypes = {
+  searchMode: PropTypes.oneOf(["general", "advanced"]).isRequired,
+  onModeChange: PropTypes.func.isRequired,
+  generalSearch: PropTypes.string.isRequired,
+  onGeneralSearchChange: PropTypes.func.isRequired,
+  advancedSearch: PropTypes.shape({
+    givenName: PropTypes.string,
+    familyName: PropTypes.string,
+    gender: PropTypes.string,
+    birthDate: PropTypes.string,
+    phone: PropTypes.string,
+    email: PropTypes.string,
+  }).isRequired,
+  onAdvancedSearchChange: PropTypes.func.isRequired,
+  onClearSearch: PropTypes.func.isRequired,
+  onSearch: PropTypes.func.isRequired,
+};

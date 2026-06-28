@@ -7,24 +7,19 @@ import com.example.patient.dto.PatientRequest;
 import com.example.patient.mapper.FhirMapper;
 import com.example.patient.repository.PatientRepository;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-/**
- * Patient Service REST API.
- *
- * Plain CRUD endpoints under /api/patients are used internally (and
- * directly testable via curl); /fhir/Patient endpoints return the
- * data shaped as FHIR R4 resources, which is what the GraphQL BFF
- * and any FHIR-aware client would consume.
- */
 @RestController
 public class PatientController {
 
@@ -41,22 +36,26 @@ public class PatientController {
             @RequestParam(name = "offset", defaultValue = "0") int offset,
             @RequestParam(name = "limit", required = false) Integer limit,
             @RequestParam(name = "sortBy", required = false) String sortBy,
-            @RequestParam(name = "sortDirection", required = false, defaultValue = "asc") String sortDirection) {
+            @RequestParam(name = "sortDirection", required = false, defaultValue = "asc") String sortDirection,
+            @RequestParam(name = "search", required = false) String search,
+            @RequestParam(name = "filterField", required = false) List<String> filterField,
+            @RequestParam(name = "filterValue", required = false) List<String> filterValue) {
 
+        Specification<Patient> spec = buildSpecification(search, filterField, filterValue);
+        Sort sort = buildSort(sortBy, sortDirection);
         int effectiveLimit = resolveLimit(limit);
-        List<Patient> items = repository.findAll();
-        long total = items.size();
+        int page = offset / effectiveLimit;
+        Pageable pageable = PageRequest.of(page, effectiveLimit, sort);
 
-        applySorting(items, sortBy, sortDirection);
+        Page<Patient> patientPage = repository.findAll(spec, pageable);
 
-        int fromIndex = Math.min(offset, (int) total);
-        int toIndex = Math.min(fromIndex + effectiveLimit, (int) total);
+        int fromIndex = Math.min(offset, (int) patientPage.getTotalElements());
 
         return new PagedResult<>(
-                items.subList(fromIndex, toIndex),
-                total,
+                patientPage.getContent(),
+                patientPage.getTotalElements(),
                 fromIndex,
-                toIndex - fromIndex
+                patientPage.getContent().size()
         );
     }
 
@@ -106,8 +105,6 @@ public class PatientController {
         );
     }
 
-    // --- FHIR-shaped read endpoints, mirroring a real FHIR server's surface ---
-
     @GetMapping("/fhir/Patient")
     public Map<String, Object> searchFhirPatients(
             @RequestParam(name = "_offset", defaultValue = "0") int offset,
@@ -116,15 +113,14 @@ public class PatientController {
 
         int effectiveLimit = resolveLimit(count);
         String baseUrl = buildBaseUrl(forwardedPrefix);
+        Specification<Patient> spec = Specification.where(null);
+        Sort sort = Sort.unsorted();
+        int page = offset / effectiveLimit;
+        Pageable pageable = PageRequest.of(page, effectiveLimit, sort);
 
-        List<Patient> all = repository.findAll();
-        long total = all.size();
+        Page<Patient> patientPage = repository.findAll(spec, pageable);
 
-        int fromIndex = Math.min(offset, (int) total);
-        int toIndex = Math.min(fromIndex + effectiveLimit, (int) total);
-        List<Patient> page = all.subList(fromIndex, toIndex);
-
-        return FhirMapper.toFhirBundle(page, fromIndex, effectiveLimit, total, baseUrl);
+        return FhirMapper.toFhirBundle(patientPage.getContent(), offset, effectiveLimit, patientPage.getTotalElements(), baseUrl);
     }
 
     @GetMapping("/fhir/Patient/{id}")
@@ -159,33 +155,72 @@ public class PatientController {
         return prefix.isBlank() ? host : prefix;
     }
 
-    private void applySorting(List<Patient> items, String sortBy, String sortDirection) {
-        if (items == null || items.isEmpty() || sortBy == null || sortBy.isBlank()) {
-            return;
+    private Sort buildSort(String sortBy, String sortDirection) {
+        if (sortBy == null || sortBy.isBlank()) {
+            return Sort.unsorted();
         }
 
-        boolean ascending = !"desc".equalsIgnoreCase(sortDirection);
-        Comparator<Patient> comparator = switch (sortBy) {
-            case "fullName" -> Comparator.comparing(
-                    p -> (p.getGivenName() != null ? p.getGivenName() : "") + " " + (p.getFamilyName() != null ? p.getFamilyName() : "")
-            );
-            case "givenName" -> Comparator.comparing(p -> p.getGivenName() != null ? p.getGivenName() : "");
-            case "familyName" -> Comparator.comparing(p -> p.getFamilyName() != null ? p.getFamilyName() : "");
-            case "gender" -> Comparator.comparing(p -> p.getGender() != null ? p.getGender() : "");
-            case "birthDate" -> Comparator.comparing(
-                    p -> p.getBirthDate(),
-                    Comparator.nullsFirst(Comparator.naturalOrder())
-            );
-            case "phone" -> Comparator.comparing(p -> p.getPhone() != null ? p.getPhone() : "");
-            case "email" -> Comparator.comparing(p -> p.getEmail() != null ? p.getEmail() : "");
-            default -> null;
+        Sort.Direction direction = "desc".equalsIgnoreCase(sortDirection) ? Sort.Direction.DESC : Sort.Direction.ASC;
+
+        return switch (sortBy) {
+            case "fullName" -> Sort.by(direction, "givenName").ascending().and(Sort.by(direction, "familyName"));
+            case "givenName" -> Sort.by(direction, "givenName");
+            case "familyName" -> Sort.by(direction, "familyName");
+            case "gender" -> Sort.by(direction, "gender");
+            case "birthDate" -> Sort.by(direction, "birthDate");
+            case "phone" -> Sort.by(direction, "phone");
+            case "email" -> Sort.by(direction, "email");
+            default -> Sort.unsorted();
         };
+    }
 
-        if (comparator != null) {
-            if (!ascending) {
-                comparator = comparator.reversed();
-            }
-            items.sort(comparator);
+    private Specification<Patient> buildSpecification(String search, List<String> filterField, List<String> filterValue) {
+        Specification<Patient> spec = Specification.where(null);
+
+        if (search != null && !search.isBlank()) {
+            String lowerSearch = "%" + search.toLowerCase() + "%";
+            spec = spec.and((root, query, cb) -> cb.or(
+                    cb.like(cb.lower(root.get("givenName")), lowerSearch),
+                    cb.like(cb.lower(root.get("familyName")), lowerSearch),
+                    cb.like(cb.lower(root.get("gender")), lowerSearch),
+                    cb.like(cb.lower(root.get("phone")), lowerSearch),
+                    cb.like(cb.lower(root.get("email")), lowerSearch),
+                    cb.like(cb.function("to_char", String.class, root.get("birthDate"), cb.literal("YYYY-MM-DD")), lowerSearch)
+            ));
         }
+
+        if (filterField != null && filterValue != null) {
+            int size = Math.min(filterField.size(), filterValue.size());
+            for (int i = 0; i < size; i++) {
+                String field = filterField.get(i);
+                String value = filterValue.get(i);
+                if (field == null || field.isBlank() || value == null || value.isBlank()) {
+                    continue;
+                }
+
+                String lowerValue = "%" + value.toLowerCase() + "%";
+                spec = spec.and(buildFieldSpecification(field, lowerValue));
+            }
+        }
+
+        return spec;
+    }
+
+    private Specification<Patient> buildFieldSpecification(String field, String lowerValue) {
+        return (root, query, cb) -> {
+            return switch (field) {
+                case "fullName" -> cb.or(
+                        cb.like(cb.lower(root.get("givenName")), lowerValue),
+                        cb.like(cb.lower(root.get("familyName")), lowerValue)
+                );
+                case "givenName" -> cb.like(cb.lower(root.get("givenName")), lowerValue);
+                case "familyName" -> cb.like(cb.lower(root.get("familyName")), lowerValue);
+                case "gender" -> cb.like(cb.lower(root.get("gender")), lowerValue);
+                case "birthDate" -> cb.like(cb.function("to_char", String.class, root.get("birthDate"), cb.literal("YYYY-MM-DD")), lowerValue);
+                case "phone" -> cb.like(cb.lower(root.get("phone")), lowerValue);
+                case "email" -> cb.like(cb.lower(root.get("email")), lowerValue);
+                default -> cb.conjunction();
+            };
+        };
     }
 }
