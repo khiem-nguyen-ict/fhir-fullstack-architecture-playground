@@ -24,15 +24,17 @@ const ENABLE_GRAPHIQL = process.env.ENABLE_GRAPHIQL !== "false";
 const app = express();
 
 app.use(helmet({
-  contentSecurityPolicy: ENABLE_GRAPHIQL
-    ? false
-    : {
-        directives: {
-          defaultSrc: ["'self'"],
-          scriptSrc: ["'self'"],
-          styleSrc: ["'self'", "'unsafe-inline'"],
-        },
-      },
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ENABLE_GRAPHIQL
+        ? ["'self'", "'unsafe-inline'"]
+        : ["'self'"],
+      styleSrc: ENABLE_GRAPHIQL
+        ? ["'self'", "'unsafe-inline'"]
+        : ["'self'", "'unsafe-inline'"],
+    },
+  },
   xssFilter: true,
   noSniff: true,
   frameguard: { action: "deny" },
