@@ -234,7 +234,7 @@ export default function PatientsPage() {
   return (
     <Box>
       {error && (
-        <ToastBox type="error" message={error} />
+        <ToastBox type="error" message={error} onClose={() => setError(null)} />
       )}
 
       <PatientForm onSubmit={handleCreate} />

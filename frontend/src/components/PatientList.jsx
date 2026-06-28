@@ -1,6 +1,6 @@
 import React from "react";
 import { graphqlRequest } from "../graphqlClient.js";
-import { Paper, Typography, Table, TableHead, TableBody, TableRow, TableCell, IconButton, Link, TableSortLabel } from "@mui/material";
+import { Paper, Typography, Table, TableHead, TableBody, TableRow, TableCell, IconButton, Link, TableSortLabel, TableContainer, useMediaQuery } from "@mui/material";
 import { Delete as DeleteIcon, Edit as EditIcon } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { formatDate } from "../utils/dateFormat.js";
@@ -28,6 +28,7 @@ function ColumnHeader({ field, label, sortBy, sortDirection, onSort }) {
 
 export default function PatientList({ patients, onPatientDeleted, sortBy, sortDirection, onSort }) {
   const navigate = useNavigate();
+  const isXs = useMediaQuery("(max-width:600px)");
 
   async function handleDelete(id) {
     try {
@@ -54,14 +55,21 @@ export default function PatientList({ patients, onPatientDeleted, sortBy, sortDi
       <Typography variant="h2" gutterBottom>
         Patients
       </Typography>
+        <TableContainer sx={{ overflowX: "auto" }}>
         <Table>
           <TableHead>
             <TableRow>
               <ColumnHeader field="fullName" label="Name" sortBy={sortBy} sortDirection={sortDirection} onSort={onSort} />
-              <ColumnHeader field="gender" label="Gender" sortBy={sortBy} sortDirection={sortDirection} onSort={onSort} />
+              {!isXs && (
+                <ColumnHeader field="gender" label="Gender" sortBy={sortBy} sortDirection={sortDirection} onSort={onSort} />
+              )}
               <ColumnHeader field="birthDate" label="Birth date" sortBy={sortBy} sortDirection={sortDirection} onSort={onSort} />
-              <ColumnHeader field="phone" label="Phone" sortBy={sortBy} sortDirection={sortDirection} onSort={onSort} />
-              <ColumnHeader field="email" label="Email" sortBy={sortBy} sortDirection={sortDirection} onSort={onSort} />
+              {!isXs && (
+                <ColumnHeader field="phone" label="Phone" sortBy={sortBy} sortDirection={sortDirection} onSort={onSort} />
+              )}
+              {!isXs && (
+                <ColumnHeader field="email" label="Email" sortBy={sortBy} sortDirection={sortDirection} onSort={onSort} />
+              )}
               <TableCell></TableCell>
             </TableRow>
           </TableHead>
@@ -69,26 +77,32 @@ export default function PatientList({ patients, onPatientDeleted, sortBy, sortDi
           {patients.map((p) => (
             <TableRow key={p.id}>
               <TableCell>{p.fullName}</TableCell>
-              <TableCell>{p.gender || "—"}</TableCell>
+              {!isXs && (
+                <TableCell>{p.gender || "—"}</TableCell>
+              )}
               <TableCell>{formatDate(p.birthDate) || "—"}</TableCell>
-              <TableCell sx={{ maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={p.phone || undefined}>
-                {p.phone ? (
-                  <Link href={`tel:${p.phone.replace(/[^+\d]/g, "")}`} underline="hover">
-                    {formatPhone(p.phone)}
-                  </Link>
-                ) : (
-                  "—"
-                )}
-              </TableCell>
-              <TableCell sx={{ maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={p.email || undefined}>
-                {p.email ? (
-                  <Link href={`mailto:${p.email}`} underline="hover">
-                    {p.email}
-                  </Link>
-                ) : (
-                  "—"
-                )}
-              </TableCell>
+              {!isXs && (
+                <TableCell sx={{ maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={p.phone || undefined}>
+                  {p.phone ? (
+                    <Link href={`tel:${p.phone.replace(/[^+\d]/g, "")}`} underline="hover">
+                      {formatPhone(p.phone)}
+                    </Link>
+                  ) : (
+                    "—"
+                  )}
+                </TableCell>
+              )}
+              {!isXs && (
+                <TableCell sx={{ maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={p.email || undefined}>
+                  {p.email ? (
+                    <Link href={`mailto:${p.email}`} underline="hover">
+                      {p.email}
+                    </Link>
+                  ) : (
+                    "—"
+                  )}
+                </TableCell>
+              )}
               <TableCell>
                 <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
                   <IconButton 
@@ -112,7 +126,8 @@ export default function PatientList({ patients, onPatientDeleted, sortBy, sortDi
             </TableRow>
           ))}
         </TableBody>
-      </Table>
+        </Table>
+      </TableContainer>
     </Paper>
   );
 }
