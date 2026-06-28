@@ -19,7 +19,9 @@ React (frontend) → GraphQL BFF (bff) → Patient Service (services/patient-ser
 It's a playground for trying out architecture patterns around HL7 FHIR
 without standing up a full FHIR server: `patient-service` owns the data
 and exposes both a plain REST CRUD API and a `/fhir/Patient` read API
-shaped like a real FHIR R4 `Patient` resource / `Bundle`.
+shaped like a real FHIR R4 `Patient` resource / `Bundle`. The service
+also supports patient search through general search (`?search=<term>`) and
+advanced field-specific filtering (`?filterField=field&filterValue=value`).
 
 ## Components
 
@@ -27,6 +29,8 @@ shaped like a real FHIR R4 `Patient` resource / `Bundle`.
   `Patient` records in Postgres (or in-memory H2 when run standalone).
   Exposes:
   - `GET/POST/PUT/DELETE /api/patients` — plain CRUD
+  - `GET /api/patients?search=<term>` — general search across name, email, birthDate, gender, phone
+  - `GET /api/patients?filterField=field&filterValue=value` — advanced search by specific fields (givenName, familyName, gender, birthDate, phone, email)
   - `GET /fhir/Patient`, `GET /fhir/Patient/{id}` — FHIR R4-shaped reads
   - `GET /health`
 - **bff** — Node.js GraphQL gateway (Apollo Server) that exposes a
@@ -164,13 +168,25 @@ GraphQL is available at `https://<bff-service-name>.onrender.com/graphql`.
 # REST CRUD on patient-service directly
 curl http://localhost:8081/api/patients
 
+# General search across multiple fields
+curl "http://localhost:8081/api/patients?search=jo"
+
+# Advanced search by specific fields
+curl "http://localhost:8081/api/patients?filterField=gender&filterValue=male"
+curl "http://localhost:8081/api/patients?filterField=birthDate&filterValue=2024"
+
 # FHIR-shaped bundle
 curl http://localhost:8081/fhir/Patient
 
 # GraphQL via the BFF
 curl -X POST http://localhost:4000/ \
   -H 'Content-Type: application/json' \
-  -d '{"query":"{ patients { id fullName email } }"}'
+  -d '{"query":"{ patients(search: \"jo\") { totalCount patients { id fullName } } }"}'
+
+# GraphQL with advanced filtering
+curl -X POST http://localhost:4000/ \
+  -H 'Content-Type: application/json' \
+  -d '{"query":"{ patients(filterField: [\"gender\", \"birthDate\"], filterValue: [\"male\", \"2024\"]) { totalCount patients { id fullName gender birthDate } } }"}'
 ```
 
 See `docs/architecture.md` for more on how the layers fit together.
