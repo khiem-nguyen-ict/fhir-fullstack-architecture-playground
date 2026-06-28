@@ -1,5 +1,11 @@
 import React from "react";
-import { Box, TextField, ToggleButton, ToggleButtonGroup, Button, Grid } from "@mui/material";
+import {
+  Box,
+  TextField,
+  ToggleButton,
+  ToggleButtonGroup,
+  Button,
+} from "@mui/material";
 import { Search as SearchIcon } from "@mui/icons-material";
 import PropTypes from "prop-types";
 
@@ -43,7 +49,9 @@ export default function PatientSearch({
             value={generalSearch}
             onChange={onGeneralSearchChange}
             InputProps={{
-              startAdornment: <SearchIcon sx={{ mr: 1, color: "text.secondary" }} />,
+              startAdornment: (
+                <SearchIcon sx={{ mr: 1, color: "text.secondary" }} />
+              ),
             }}
             sx={{ flex: 1 }}
           />
@@ -52,20 +60,29 @@ export default function PatientSearch({
           </Button>
         </Box>
       ) : (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5}}>
-          <Grid container spacing={1.5}>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "1fr",
+                sm: "repeat(2, 1fr)",
+                md: "repeat(3, 1fr)",
+              },
+              gap: 1.5,
+            }}
+          >
             {ADVANCED_FIELDS.map(({ key, label }) => (
-              <Grid item xs={12} md={6} lg={3} key={key}>
-                <TextField
-                  size="small"
-                  fullWidth
-                  label={label}
-                  value={advancedSearch[key]}
-                  onChange={(e) => onAdvancedSearchChange(key, e.target.value)}
-                />
-              </Grid>
+              <TextField
+                key={key}
+                size="small"
+                fullWidth
+                label={label}
+                value={advancedSearch[key]}
+                onChange={(e) => onAdvancedSearchChange(key, e.target.value)}
+              />
             ))}
-          </Grid>
+          </Box>
           <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
             <Box
               component="button"

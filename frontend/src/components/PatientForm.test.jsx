@@ -1,6 +1,6 @@
 import React from "react";
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 import PatientForm from "./PatientForm.jsx";
 
 describe("PatientForm", () => {
@@ -9,6 +9,7 @@ describe("PatientForm", () => {
     expect(screen.getByLabelText(/Given name/)).toBeDefined();
     expect(screen.getByLabelText(/Family name/)).toBeDefined();
     expect(screen.getByRole("combobox", { name: /Gender/ })).toBeDefined();
+    expect(screen.getByLabelText("Birth date")).toBeDefined();
     expect(screen.getByLabelText("Phone")).toBeDefined();
     expect(screen.getByLabelText("Email")).toBeDefined();
   });
