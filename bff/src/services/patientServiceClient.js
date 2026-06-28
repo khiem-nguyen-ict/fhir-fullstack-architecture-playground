@@ -3,7 +3,16 @@ import fetch from "node-fetch";
 const PATIENT_SERVICE_URL =
   process.env.PATIENT_SERVICE_URL || "http://localhost:8081";
 
-const ALLOWED_SORT_FIELDS = ["id", "givenName", "familyName", "email", "birthDate"];
+const ALLOWED_SORT_FIELDS = [
+  "id",
+  "fullName",
+  "givenName",
+  "familyName",
+  "gender",
+  "birthDate",
+  "phone",
+  "email",
+];
 const ALLOWED_SORT_DIRECTIONS = ["asc", "desc"];
 const MAX_INPUT_LENGTH = 255;
 
@@ -62,7 +71,7 @@ async function request(path, options = {}) {
   if (!res.ok) {
     const body = await res.text().catch(() => "");
     throw new Error(
-      `patient-service ${options.method || "GET"} ${path} failed: ${res.status} ${body}`
+      `patient-service ${options.method || "GET"} ${path} failed: ${res.status} ${body}`,
     );
   }
 
@@ -74,23 +83,43 @@ async function request(path, options = {}) {
 }
 
 export const patientServiceClient = {
-  listPatients: (offset = 0, limit, sortBy, sortDirection, search, filterField, filterValue) => {
+  listPatients: (
+    offset = 0,
+    limit,
+    sortBy,
+    sortDirection,
+    search,
+    filterField,
+    filterValue,
+  ) => {
     const qs = new URLSearchParams();
     qs.set("offset", String(offset));
+
     if (limit != null) qs.set("limit", String(limit));
-    if (sortBy != null && ALLOWED_SORT_FIELDS.includes(sortBy)) qs.set("sortBy", sortBy);
-    if (sortDirection != null && ALLOWED_SORT_DIRECTIONS.includes(sortDirection)) qs.set("sortDirection", sortDirection);
-    if (search != null && search.trim() !== "") qs.set("search", sanitizeString(search).substring(0, 100));
+    if (sortBy != null && ALLOWED_SORT_FIELDS.includes(sortBy))
+      qs.set("sortBy", sortBy);
+    if (
+      sortDirection != null &&
+      ALLOWED_SORT_DIRECTIONS.includes(sortDirection)
+    ) {
+      qs.set("sortDirection", sortDirection);
+    }
+    if (search != null && search.trim() !== "")
+      qs.set("search", sanitizeString(search).substring(0, 100));
     if (filterField != null && filterField.length > 0) {
-      filterField.forEach(f => {
+      filterField.forEach((f) => {
         if (f && f.trim() !== "" && ALLOWED_SORT_FIELDS.includes(f.trim())) {
           qs.append("filterField", f.trim());
         }
       });
     }
     if (filterValue != null && filterValue.length > 0) {
-      filterValue.forEach(v => { if (v && v.trim() !== "") qs.append("filterValue", sanitizeString(v).substring(0, 255)); });
+      filterValue.forEach((v) => {
+        if (v && v.trim() !== "")
+          qs.append("filterValue", sanitizeString(v).substring(0, 255));
+      });
     }
+    console.debug(`Requesting /api/patients with query: ${qs.toString()}`);
     return request(`/api/patients?${qs.toString()}`);
   },
   getPatient: (id) => request(`/api/patients/${id}`),
@@ -109,6 +138,5 @@ export const patientServiceClient = {
       body: JSON.stringify(input),
     });
   },
-  deletePatient: (id) =>
-    request(`/api/patients/${id}`, { method: "DELETE" }),
+  deletePatient: (id) => request(`/api/patients/${id}`, { method: "DELETE" }),
 };
