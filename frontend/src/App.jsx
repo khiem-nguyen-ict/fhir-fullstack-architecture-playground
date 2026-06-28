@@ -24,10 +24,12 @@ export default function App() {
             <ThemeToggle />
           </Box>
 
-          <Routes>
-            <Route path="/" element={<PatientsPage />} />
-            <Route path="/patients/:id" element={<EditPatientPage />} />
-          </Routes>
+          <main>
+            <Routes>
+              <Route path="/" element={<PatientsPage />} />
+              <Route path="/patients/:id" element={<EditPatientPage />} />
+            </Routes>
+          </main>
         </Container>
       </Box>
     </>

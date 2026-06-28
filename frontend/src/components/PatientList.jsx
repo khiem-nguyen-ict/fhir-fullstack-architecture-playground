@@ -40,8 +40,8 @@ export default function PatientList({ patients, onPatientDeleted, sortBy, sortDi
 
   if (!patients || patients.length === 0) {
     return (
-      <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
-        <Typography variant="h6" gutterBottom>
+      <Paper elevation={2} sx={{ p: 3, mb: 3 }} role="region" aria-label="Patients list">
+        <Typography variant="h2" gutterBottom>
           Patients
         </Typography>
         <Typography>No patients yet.</Typography>
@@ -50,8 +50,8 @@ export default function PatientList({ patients, onPatientDeleted, sortBy, sortDi
   }
 
   return (
-    <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
-      <Typography variant="h6" gutterBottom>
+    <Paper elevation={2} sx={{ p: 3, mb: 3 }} role="region" aria-label="Patients list">
+      <Typography variant="h2" gutterBottom>
         Patients
       </Typography>
         <Table>
@@ -95,6 +95,7 @@ export default function PatientList({ patients, onPatientDeleted, sortBy, sortDi
                     onClick={() => navigate(`/patients/${p.id}`)}
                     color="primary"
                     size="small"
+                    aria-label="View details"
                   >
                     <EditIcon />
                   </IconButton>
@@ -102,6 +103,7 @@ export default function PatientList({ patients, onPatientDeleted, sortBy, sortDi
                     onClick={() => handleDelete(p.id)} 
                     color="error"
                     size="small"
+                    aria-label="Delete"
                   >
                     <DeleteIcon />
                   </IconButton>

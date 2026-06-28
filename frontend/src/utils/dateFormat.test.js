@@ -38,4 +38,8 @@ describe("dateFormat", () => {
   it("formats to yyyy-mm-dd when specified", () => {
     expect(formatDate("1990-01-15", "yyyy-mm-dd")).toBe("1990-01-15");
   });
+
+  it("returns default format for unknown format string", () => {
+    expect(formatDate("1990-01-15", "unknown-format")).toBe("15/01/1990");
+  });
 });

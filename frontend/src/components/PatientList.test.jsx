@@ -1,6 +1,6 @@
 import React from "react";
-import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect } from "vitest";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import PatientList from "./PatientList.jsx";
 
@@ -58,5 +58,28 @@ describe("PatientList", () => {
       </BrowserRouter>
     );
     expect(screen.getAllByText("—").length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("renders ColumnHeader with sort functionality", () => {
+    const mockPatients = [
+      {
+        id: "1",
+        fullName: "John Doe",
+        gender: "male",
+        birthDate: "1990-01-01",
+        phone: "555-1234",
+        email: "john@example.com",
+      },
+    ];
+    const onSort = vi.fn();
+    
+    render(
+      <BrowserRouter>
+        <PatientList patients={mockPatients} onPatientDeleted={() => {}} sortBy="fullName" sortDirection="asc" onSort={onSort} />
+      </BrowserRouter>
+    );
+
+    fireEvent.click(screen.getByText("Name"));
+    expect(onSort).toHaveBeenCalledWith("fullName");
   });
 });
