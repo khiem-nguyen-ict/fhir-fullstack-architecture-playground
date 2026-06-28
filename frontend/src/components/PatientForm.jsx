@@ -36,16 +36,17 @@ export default function PatientForm({
       <Typography variant="h6" gutterBottom>
         {title || "Add Patient"}
       </Typography>
-      {error && (
-        <ToastBox type="error" message={error} />
-      )}
+      {error && <ToastBox type="error" message={error} />}
       {success && (
         <ToastBox type="success" message="Patient created successfully" />
       )}
       <Formik
         initialValues={initialValues || emptyForm}
         validationSchema={patientSchema}
-        onSubmit={async (values, { setSubmitting: setFormikSubmitting, resetForm }) => {
+        onSubmit={async (
+          values,
+          { setSubmitting: setFormikSubmitting, resetForm }
+        ) => {
           setSubmitting(true);
           setError(null);
           setSuccess(false);
@@ -67,10 +68,14 @@ export default function PatientForm({
           <Form>
             <Box
               sx={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: 1.5,
-                alignItems: "flex-end",
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  sm: "repeat(2, 1fr)",
+                  md: "repeat(3, 1fr)",
+                },
+                gap: 2,
+                alignItems: "start",
               }}
             >
               <Field
@@ -78,11 +83,11 @@ export default function PatientForm({
                 label="Given name"
                 name="givenName"
                 required
+                fullWidth
                 size="small"
                 slotProps={{
                   inputLabel: { shrink: true },
                 }}
-                sx={{ flex: 1, minWidth: 160 }}
                 error={touched.givenName && Boolean(errors.givenName)}
                 helperText={touched.givenName && errors.givenName}
               />
@@ -91,11 +96,11 @@ export default function PatientForm({
                 label="Family name"
                 name="familyName"
                 required
+                fullWidth
                 size="small"
                 slotProps={{
                   inputLabel: { shrink: true },
                 }}
-                sx={{ flex: 1, minWidth: 160 }}
                 error={touched.familyName && Boolean(errors.familyName)}
                 helperText={touched.familyName && errors.familyName}
               />
@@ -104,11 +109,11 @@ export default function PatientForm({
                 select
                 label="Gender"
                 name="gender"
+                fullWidth
                 size="small"
                 slotProps={{
                   inputLabel: { shrink: true },
                 }}
-                sx={{ flex: 1, minWidth: 120 }}
               >
                 <MenuItem value="">Gender</MenuItem>
                 <MenuItem value="male">male</MenuItem>
@@ -121,24 +126,21 @@ export default function PatientForm({
                 type="date"
                 label="Birth date"
                 name="birthDate"
+                fullWidth
                 size="small"
                 slotProps={{
                   inputLabel: { shrink: true },
-                }}
-                sx={{
-                  flex: 1,
-                  minWidth: 140,
                 }}
               />
               <Field
                 as={TextField}
                 label="Phone"
                 name="phone"
+                fullWidth
                 size="small"
                 slotProps={{
                   inputLabel: { shrink: true },
                 }}
-                sx={{ flex: 1, minWidth: 140 }}
                 error={touched.phone && Boolean(errors.phone)}
                 helperText={touched.phone && errors.phone}
               />
@@ -146,31 +148,42 @@ export default function PatientForm({
                 as={TextField}
                 label="Email"
                 name="email"
+                fullWidth
                 size="small"
                 slotProps={{
                   inputLabel: { shrink: true },
                 }}
-                sx={{ flex: 1, minWidth: 160 }}
                 error={touched.email && Boolean(errors.email)}
                 helperText={touched.email && errors.email}
               />
-              <Button
-                type="submit"
-                variant="contained"
-                disabled={submitting}
-                sx={{ height: 40, px: 2 }}
+
+              <Box
+                sx={{
+                  display: "flex",
+                  gap: 1.5,
+                  gridColumn: "1 / -1",
+                  mt: 0.5,
+                  justifyContent: "flex-end",
+                }}
               >
-                {submitting ? "Saving…" : submitButtonText || "Add Patient"}
-              </Button>
-              {onCancel && (
                 <Button
-                  variant="outlined"
-                  onClick={onCancel}
+                  type="submit"
+                  variant="contained"
+                  disabled={submitting}
                   sx={{ height: 40, px: 2 }}
                 >
-                  Cancel
+                  {submitting ? "Saving…" : submitButtonText || "Add Patient"}
                 </Button>
-              )}
+                {onCancel && (
+                  <Button
+                    variant="outlined"
+                    onClick={onCancel}
+                    sx={{ height: 40, px: 2 }}
+                  >
+                    Cancel
+                  </Button>
+                )}
+              </Box>
             </Box>
           </Form>
         )}
