@@ -12,8 +12,6 @@ import PropTypes from "prop-types";
 const ADVANCED_FIELDS = [
   { key: "givenName", label: "Given name" },
   { key: "familyName", label: "Family name" },
-  { key: "gender", label: "Gender" },
-  { key: "birthDate", label: "Birth date" },
   { key: "phone", label: "Phone" },
   { key: "email", label: "Email" },
 ];
@@ -45,7 +43,7 @@ export default function PatientSearch({
         <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
           <TextField
             size="small"
-            placeholder="Search by name, email, phone, gender, or birth date..."
+            placeholder="Search by name, email, or phone..."
             value={generalSearch}
             onChange={onGeneralSearchChange}
             InputProps={{
@@ -119,8 +117,6 @@ PatientSearch.propTypes = {
   advancedSearch: PropTypes.shape({
     givenName: PropTypes.string,
     familyName: PropTypes.string,
-    gender: PropTypes.string,
-    birthDate: PropTypes.string,
     phone: PropTypes.string,
     email: PropTypes.string,
   }).isRequired,

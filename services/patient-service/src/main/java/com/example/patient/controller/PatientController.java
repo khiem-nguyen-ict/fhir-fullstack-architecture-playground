@@ -7,6 +7,8 @@ import com.example.patient.dto.PatientRequest;
 import com.example.patient.mapper.FhirMapper;
 import com.example.patient.repository.PatientRepository;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +24,8 @@ import java.util.NoSuchElementException;
 
 @RestController
 public class PatientController {
+
+    private static final Logger log = LoggerFactory.getLogger(PatientController.class);
 
     private final PatientRepository repository;
     private final PaginationProperties paginationProperties;
@@ -40,6 +44,9 @@ public class PatientController {
             @RequestParam(name = "search", required = false) String search,
             @RequestParam(name = "filterField", required = false) List<String> filterField,
             @RequestParam(name = "filterValue", required = false) List<String> filterValue) {
+
+        log.info("Received /api/patients: offset={}, limit={}, sortBy={}, sortDirection={}, search={}, filterField={}, filterValue={}",
+                offset, limit, sortBy, sortDirection, search, filterField, filterValue);
 
         Specification<Patient> spec = buildSpecification(search, filterField, filterValue);
         Sort sort = buildSort(sortBy, sortDirection);

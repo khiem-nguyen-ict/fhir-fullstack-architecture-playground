@@ -68,8 +68,6 @@ export default function PatientsPage() {
   const [advancedSearch, setAdvancedSearch] = useState({
     givenName: "",
     familyName: "",
-    gender: "",
-    birthDate: "",
     phone: "",
     email: "",
   });
@@ -79,8 +77,6 @@ export default function PatientsPage() {
     advancedSearch: {
       givenName: "",
       familyName: "",
-      gender: "",
-      birthDate: "",
       phone: "",
       email: "",
     },
@@ -200,8 +196,6 @@ export default function PatientsPage() {
     setAdvancedSearch({
       givenName: "",
       familyName: "",
-      gender: "",
-      birthDate: "",
       phone: "",
       email: "",
     });
@@ -211,8 +205,6 @@ export default function PatientsPage() {
       advancedSearch: {
         givenName: "",
         familyName: "",
-        gender: "",
-        birthDate: "",
         phone: "",
         email: "",
       },

@@ -77,6 +77,7 @@ const server = new ApolloServer({
   ],
   formatError: (error) => {
     if (isProduction) {
+      console.error(`GraphQL Error: ${error.message}`);
       return new Error(error.message);
     }
     return error;
@@ -94,7 +95,6 @@ if (ENABLE_GRAPHIQL) {
 app.use(
   "/graphql",
   queryRateLimiter,
-  express.json({ limit: "1mb" }),
   expressMiddleware(server)
 );
 

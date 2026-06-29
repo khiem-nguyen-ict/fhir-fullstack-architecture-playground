@@ -11,8 +11,6 @@ const defaultProps = {
   advancedSearch: {
     givenName: "",
     familyName: "",
-    gender: "",
-    birthDate: "",
     phone: "",
     email: "",
   },
@@ -44,8 +42,6 @@ describe("PatientSearch", () => {
     render(<PatientSearch {...defaultProps} searchMode="advanced" />);
     expect(screen.getByLabelText("Given name")).toBeDefined();
     expect(screen.getByLabelText("Family name")).toBeDefined();
-    expect(screen.getByLabelText("Gender")).toBeDefined();
-    expect(screen.getByLabelText("Birth date")).toBeDefined();
     expect(screen.getByLabelText("Phone")).toBeDefined();
     expect(screen.getByLabelText("Email")).toBeDefined();
     expect(screen.getByText("Clear search")).toBeDefined();

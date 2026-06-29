@@ -3,8 +3,7 @@ import fetch from "node-fetch";
 const PATIENT_SERVICE_URL =
   process.env.PATIENT_SERVICE_URL || "http://localhost:8081";
 
-const ALLOWED_SORT_FIELDS = [
-  "id",
+export const ALLOWED_SORT_FIELDS = [
   "fullName",
   "givenName",
   "familyName",
@@ -13,10 +12,16 @@ const ALLOWED_SORT_FIELDS = [
   "phone",
   "email",
 ];
-const ALLOWED_SORT_DIRECTIONS = ["asc", "desc"];
+export const ALLOWED_FILTER_FIELDS = [
+  "givenName",
+  "familyName",
+  "email",
+  "phone",
+];
+export const ALLOWED_SORT_DIRECTIONS = ["asc", "desc"];
 const MAX_INPUT_LENGTH = 255;
 
-function sanitizeString(str) {
+export function sanitizeString(str) {
   if (typeof str !== "string") return str;
   return str.replace(/[\x00-\x1F\x7F]/g, "").trim();
 }
@@ -53,6 +58,12 @@ export function validatePatientInput(input) {
     errors.push("Phone is required");
   } else if (!/^\+?\d[\d\s\-()]{7,18}\d$/.test(input.phone)) {
     errors.push("Invalid phone number");
+  }
+
+  if (input?.birthDate != null && input.birthDate !== "") {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(input.birthDate)) {
+      errors.push("Invalid birthDate format (expected YYYY-MM-DD)");
+    }
   }
 
   validateInputLengths(input);
@@ -106,9 +117,11 @@ export const patientServiceClient = {
     }
     if (search != null && search.trim() !== "")
       qs.set("search", sanitizeString(search).substring(0, 100));
+
+    // Spring Boot @RequestParam List<String> binds repeated bare keys correctly
     if (filterField != null && filterField.length > 0) {
       filterField.forEach((f) => {
-        if (f && f.trim() !== "" && ALLOWED_SORT_FIELDS.includes(f.trim())) {
+        if (f && f.trim() !== "" && ALLOWED_FILTER_FIELDS.includes(f.trim())) {
           qs.append("filterField", f.trim());
         }
       });
@@ -119,6 +132,7 @@ export const patientServiceClient = {
           qs.append("filterValue", sanitizeString(v).substring(0, 255));
       });
     }
+
     console.debug(`Requesting /api/patients with query: ${qs.toString()}`);
     return request(`/api/patients?${qs.toString()}`);
   },
