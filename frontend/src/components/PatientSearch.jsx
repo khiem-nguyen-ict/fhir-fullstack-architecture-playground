@@ -55,7 +55,7 @@ export default function PatientSearch({
             }}
             sx={{ flex: 1 }}
           />
-          <Button variant="contained" onClick={onSearch} size="small">
+          <Button variant="contained" onClick={onSearch} size="small" startIcon={<SearchIcon />}>
             Search
           </Button>
         </Box>
@@ -101,7 +101,7 @@ export default function PatientSearch({
               Clear search
             </Box>
             <Box sx={{ flex: 1 }} />
-            <Button variant="contained" onClick={onSearch} size="small">
+            <Button variant="contained" onClick={onSearch} size="small" startIcon={<SearchIcon />}>
               Search
             </Button>
           </Box>

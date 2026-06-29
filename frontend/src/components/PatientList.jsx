@@ -5,6 +5,7 @@ import { Delete as DeleteIcon, Edit as EditIcon } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { formatDate } from "../utils/dateFormat.js";
 import { formatPhone } from "../utils/formatPhone.js";
+import ConfirmDialog, { useConfirmDialog } from "./ConfirmDialog.jsx";
 
 const DELETE_PATIENT_MUTATION = `
   mutation DeletePatient($id: ID!) {
@@ -29,8 +30,16 @@ function ColumnHeader({ field, label, sortBy, sortDirection, onSort }) {
 export default function PatientList({ patients, onPatientDeleted, sortBy, sortDirection, onSort }) {
   const navigate = useNavigate();
   const isXs = useMediaQuery("(max-width:600px)");
+  const { showConfirmDialog, confirmDialogProps, confirm } = useConfirmDialog();
 
   async function handleDelete(id) {
+    const confirmed = await confirm({
+      title: "Delete Patient",
+      message: "Are you sure you want to delete this patient? This action cannot be undone.",
+      confirmText: "Delete",
+      cancelText: "Cancel",
+    });
+    if (!confirmed) return;
     try {
       await graphqlRequest(DELETE_PATIENT_MUTATION, { id });
       onPatientDeleted();
@@ -55,7 +64,7 @@ export default function PatientList({ patients, onPatientDeleted, sortBy, sortDi
       <Typography variant="h2" gutterBottom>
         Patients
       </Typography>
-        <TableContainer sx={{ overflowX: "auto" }}>
+      <TableContainer sx={{ overflowX: "auto" }}>
         <Table>
           <TableHead>
             <TableRow>
@@ -73,61 +82,62 @@ export default function PatientList({ patients, onPatientDeleted, sortBy, sortDi
               <TableCell></TableCell>
             </TableRow>
           </TableHead>
-        <TableBody>
-          {patients.map((p) => (
-            <TableRow key={p.id}>
-              <TableCell>{p.fullName}</TableCell>
-              {!isXs && (
-                <TableCell>{p.gender || "—"}</TableCell>
-              )}
-              <TableCell>{formatDate(p.birthDate) || "—"}</TableCell>
-              {!isXs && (
-                <TableCell sx={{ maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={p.phone || undefined}>
-                  {p.phone ? (
-                    <Link href={`tel:${p.phone.replace(/[^+\d]/g, "")}`} underline="hover">
-                      {formatPhone(p.phone)}
-                    </Link>
-                  ) : (
-                    "—"
-                  )}
+          <TableBody>
+            {patients.map((p) => (
+              <TableRow key={p.id}>
+                <TableCell>{p.fullName}</TableCell>
+                {!isXs && (
+                  <TableCell>{p.gender || "—"}</TableCell>
+                )}
+                <TableCell>{formatDate(p.birthDate) || "—"}</TableCell>
+                {!isXs && (
+                  <TableCell sx={{ maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={p.phone || undefined}>
+                    {p.phone ? (
+                      <Link href={`tel:${p.phone.replace(/[^+\d]/g, "")}`} underline="hover">
+                        {formatPhone(p.phone)}
+                      </Link>
+                    ) : (
+                      "—"
+                    )}
+                  </TableCell>
+                )}
+                {!isXs && (
+                  <TableCell sx={{ maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={p.email || undefined}>
+                    {p.email ? (
+                      <Link href={`mailto:${p.email}`} underline="hover">
+                        {p.email}
+                      </Link>
+                    ) : (
+                      "—"
+                    )}
+                  </TableCell>
+                )}
+                <TableCell>
+                  <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                    <IconButton 
+                      onClick={() => navigate(`/patients/${p.id}`)}
+                      color="primary"
+                      size="small"
+                      aria-label="View details"
+                    >
+                      <EditIcon />
+                    </IconButton>
+                    <IconButton 
+                      onClick={() => handleDelete(p.id)} 
+                      color="error"
+                      size="small"
+                      aria-label="Delete"
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </span>
                 </TableCell>
-              )}
-              {!isXs && (
-                <TableCell sx={{ maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={p.email || undefined}>
-                  {p.email ? (
-                    <Link href={`mailto:${p.email}`} underline="hover">
-                      {p.email}
-                    </Link>
-                  ) : (
-                    "—"
-                  )}
-                </TableCell>
-              )}
-              <TableCell>
-                <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                  <IconButton 
-                    onClick={() => navigate(`/patients/${p.id}`)}
-                    color="primary"
-                    size="small"
-                    aria-label="View details"
-                  >
-                    <EditIcon />
-                  </IconButton>
-                  <IconButton 
-                    onClick={() => handleDelete(p.id)} 
-                    color="error"
-                    size="small"
-                    aria-label="Delete"
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                </span>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
+              </TableRow>
+            ))}
+          </TableBody>
         </Table>
       </TableContainer>
+      <ConfirmDialog open={showConfirmDialog} {...confirmDialogProps} />
     </Paper>
   );
 }
