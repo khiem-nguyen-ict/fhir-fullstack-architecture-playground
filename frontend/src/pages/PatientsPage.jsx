@@ -268,7 +268,7 @@ export default function PatientsPage() {
       </Box>
 
       {loading ? (
-        <Typography>Loading…</Typography>
+        <Typography align="center">Loading…</Typography>
       ) : (
         <PatientList patients={patients} onPatientDeleted={loadPatients} sortBy={sortBy} sortDirection={sortDirection} onSort={handleSort} />
       )}

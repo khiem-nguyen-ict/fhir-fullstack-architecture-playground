@@ -11,7 +11,7 @@ describe("PatientList", () => {
         <PatientList patients={[]} onPatientDeleted={() => {}} />
       </BrowserRouter>
     );
-    expect(screen.getByText("No patients yet.")).toBeDefined();
+    expect(screen.getByText("No patients found.")).toBeDefined();
   });
 
   it("renders patients table with clickable phone and email when patients exist", () => {
