@@ -56,6 +56,48 @@ jobs:
         working-directory: ${{ matrix.service.working-directory }}
         if: matrix.service.name != 'patient-service'
 
+smoke-tests:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm install
+
+      - name: Install Playwright browsers
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: Start Docker services
+        working-directory: infra
+        run: docker compose up --build -d
+
+      - name: Wait for services
+        run: |
+          for i in {1..60}; do curl -s http://localhost:8081/actuator/health && break || sleep 2; done
+          for i in {1..60}; do curl -s http://localhost:4000/graphql -X POST -H "Content-Type: application/json" -d '{"query":"{__typename}"}' && break || sleep 2; done
+          for i in {1..60}; do curl -s http://localhost:5173 && break || sleep 2; done
+
+      - name: Run smoke tests
+        working-directory: frontend
+        run: npm run test:e2e -- --grep @smoke
+        env:
+          CI: true
+
+      - name: Stop Docker services
+        if: always()
+        working-directory: infra
+        run: docker compose down -v
+
   build:
     needs: test
     runs-on: ubuntu-latest

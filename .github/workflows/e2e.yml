@@ -1,0 +1,66 @@
+name: E2E Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Run environment'
+        required: true
+        default: 'docker'
+        type: string
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Install Playwright browsers
+        working-directory: frontend
+        run: npx playwright install --with-deps
+
+      - name: Start Docker services
+        working-directory: infra
+        run: docker compose up --build -d
+
+      - name: Wait for services
+        run: |
+          for i in {1..60}; do
+            curl -s http://localhost:8081/actuator/health && break || sleep 2
+          done
+          for i in {1..60}; do
+            curl -s http://localhost:4000/graphql -X POST -H "Content-Type: application/json" -d '{"query":"{__typename}"}' && break || sleep 2
+          done
+          for i in {1..60}; do
+            curl -s http://localhost:5173 && break || sleep 2
+          done
+
+      - name: Run E2E tests
+        working-directory: frontend
+        run: npm run test:e2e
+        env:
+          CI: true
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: frontend/playwright-report/
+
+      - name: Stop Docker services
+        if: always()
+        working-directory: infra
+        run: docker compose down -v

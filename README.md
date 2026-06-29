@@ -4,6 +4,7 @@
 - [Components](#components)
 - [Run the full circle demo (Docker)](#run-the-full-circle-demo-docker)
 - [Run each piece locally (no Docker)](#run-each-piece-locally-no-docker)
+- [E2E Testing](#e2e-testing)
 - [Deploy to Render.com](#deploy-to-rendercom)
 - [Quick smoke test (curl)](#quick-smoke-test-curl)
 - [License](#license)
@@ -139,6 +140,36 @@ independent scaling), add a fourth web service in Render:
 - **Port**: 5173
 
 The frontend Dockerfile will serve the built React app via Vite's preview server.
+
+## E2E Testing
+
+Playwright E2E tests validate the full stack (frontend → BFF → patient-service) against real Docker services.
+
+### Run E2E Tests Locally
+
+```bash
+# Terminal 1: Start all services
+cd infra && docker compose up --build
+
+# Terminal 2: Run tests
+cd frontend
+npm run test:e2e              # Run all tests
+npm run test:e2e:ui           # Interactive UI mode
+npm run test:e2e:debug        # Debug mode
+npm run test:e2e -- --grep @smoke  # Smoke tests only
+```
+
+### How Tests Work
+
+- **Smoke tests** (tagged `@smoke`): Run on every PR, verify core functionality (app loads, patient list renders, form submits)
+- **Full E2E suite**: Manual trigger via GitHub Actions workflow dispatch, validates all features
+- Tests clean up after themselves (create/delete test patients)
+- Executes serially (`workers: 1`) to avoid database conflicts
+
+### GitHub Actions
+
+- **Pull Requests**: Smoke tests run automatically after frontend unit tests pass
+- **Manual trigger**: Full E2E suite via Actions tab → "E2E Tests" → Run workflow
 
 ### Live URLs (after deploy)
 
