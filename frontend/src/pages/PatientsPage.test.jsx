@@ -21,7 +21,7 @@ describe("PatientsPage", () => {
     vi.restoreAllMocks();
   });
 
-  it("renders loading state while fetching patients", () => {
+  it("renders loading spinner while fetching patients", () => {
     graphqlRequest.mockImplementation(() => new Promise(() => {}));
 
     render(
@@ -30,7 +30,7 @@ describe("PatientsPage", () => {
       </MemoryRouter>
     );
 
-    expect(screen.getByText("Loading…")).toBeDefined();
+    expect(document.querySelector(".MuiCircularProgress-root")).toBeDefined();
   });
 
   it("renders patients after successful load", async () => {

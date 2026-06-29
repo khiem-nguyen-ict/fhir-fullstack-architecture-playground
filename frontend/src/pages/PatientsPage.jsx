@@ -3,6 +3,7 @@ import { graphqlRequest } from "../graphqlClient.js";
 import PatientForm from "../components/PatientForm.jsx";
 import PatientList from "../components/PatientList.jsx";
 import PatientSearch from "../components/PatientSearch.jsx";
+import LoadingList from "../components/LoadingList.jsx";
 import { Box, Typography, Pagination, Select, MenuItem, FormControl, InputLabel } from "@mui/material";
 import ToastBox from "../components/ToastBox.jsx";
 
@@ -267,11 +268,9 @@ export default function PatientsPage() {
         </FormControl>
       </Box>
 
-      {loading ? (
-        <Typography align="center">Loading…</Typography>
-      ) : (
+      <LoadingList loading={loading}>
         <PatientList patients={patients} onPatientDeleted={loadPatients} sortBy={sortBy} sortDirection={sortDirection} onSort={handleSort} />
-      )}
+      </LoadingList>
 
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
         <Pagination
