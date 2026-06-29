@@ -45,8 +45,9 @@ public class PatientController {
             @RequestParam(name = "filterField", required = false) List<String> filterField,
             @RequestParam(name = "filterValue", required = false) List<String> filterValue) {
 
-        log.info("Received /api/patients: offset={}, limit={}, sortBy={}, sortDirection={}, search={}, filterField={}, filterValue={}",
-                offset, limit, sortBy, sortDirection, search, filterField, filterValue);
+        log.info("Received /api/patients: offset={}, limit={}, sortBy={}, sortDirection={}, hasSearch={}, filterField={}",
+                offset, limit, sortBy, sortDirection, search != null && !search.isBlank(), filterField);
+        log.debug("Patient search details: search={}, filterValue={}", search, filterValue);
 
         Specification<Patient> spec = buildSpecification(search, filterField, filterValue);
         Sort sort = buildSort(sortBy, sortDirection);

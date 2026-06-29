@@ -68,12 +68,38 @@ describe("introspection blocking", () => {
   it("is disabled in production mode", async () => {
     const original = process.env.NODE_ENV;
     process.env.NODE_ENV = "production";
+    process.env.INIT_SERVER = "false";
 
-    vi.doMock("../src/resolvers/patients.js", () => ({}));
+    vi.doMock("../src/resolvers/patients.js", () => ({
+      patientQueries: {
+        patients: () => ({ patients: [], totalCount: 0 }),
+      },
+      patientMutations: {},
+    }));
+
     const serverModule = await import("../src/server.js");
-    const isProduction = process.env.NODE_ENV === "production";
+    const testApp = serverModule.app;
 
-    expect(isProduction).toBe(true);
+    const introspectionQuery = {
+      query: `
+        query IntrospectionQuery {
+          __schema {
+            types {
+              name
+            }
+          }
+        }
+      `,
+      operationName: "IntrospectionQuery"
+    };
+
+    const res = await request(testApp)
+      .post("/graphql")
+      .send(introspectionQuery)
+      .set("Content-Type", "application/json");
+
+    expect(res.body.errors).toBeDefined();
+    expect(res.body.errors[0].message).toContain("introspection is disabled");
 
     process.env.NODE_ENV = original;
   });

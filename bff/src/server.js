@@ -77,7 +77,7 @@ const server = new ApolloServer({
   ],
   formatError: (error) => {
     if (isProduction) {
-      console.error(`GraphQL Error: ${error.message}`);
+      console.error(`GraphQL Error: ${error.extensions?.code || 'INTERNAL_SERVER_ERROR'} at ${error.path?.join('.') || 'unknown'}`);
       return new Error(error.message);
     }
     return error;
@@ -110,6 +110,8 @@ app.get("/", (req, res) => {
     const indexPath = join(__dirname, "..", "public", "index.html");
     if (existsSync(indexPath)) {
       res.sendFile(indexPath);
+    } else if (process.env.NODE_ENV === "test") {
+      res.status(404).json({ error: "Not found" });
     } else {
       res.redirect("http://localhost:5173");
     }
@@ -121,6 +123,8 @@ app.get("*", (req, res) => {
     const indexPath = join(__dirname, "..", "public", "index.html");
     if (existsSync(indexPath)) {
       res.sendFile(indexPath);
+    } else if (process.env.NODE_ENV === "test") {
+      res.status(404).json({ error: "Not found" });
     } else {
       res.redirect("http://localhost:5173");
     }
