@@ -101,20 +101,4 @@ describe("PatientSearch", () => {
     fireEvent.click(screen.getByText("Advanced"));
     expect(onModeChange).toHaveBeenCalledWith(expect.anything(), "advanced");
   });
-
-  it("calls onSearch when Enter key is pressed in general search input", () => {
-    const onSearch = vi.fn();
-    render(<PatientSearch {...defaultProps} onSearch={onSearch} />);
-    const form = screen.getByRole("button", { name: "Search" }).closest("form");
-    fireEvent.submit(form);
-    expect(onSearch).toHaveBeenCalled();
-  });
-
-  it("calls onSearch when Enter key is pressed in advanced search field", () => {
-    const onSearch = vi.fn();
-    render(<PatientSearch {...defaultProps} searchMode="advanced" onSearch={onSearch} />);
-    const form = screen.getByRole("button", { name: "Search" }).closest("form");
-    fireEvent.submit(form);
-    expect(onSearch).toHaveBeenCalled();
-  });
 });

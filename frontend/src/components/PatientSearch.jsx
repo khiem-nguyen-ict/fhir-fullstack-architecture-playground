@@ -37,39 +37,12 @@ export default function PatientSearch({
         size="small"
         sx={{ mb: 1 }}
       >
-        <ToggleButton
-          value="general"
-          sx={{
-            "&.Mui-selected": {
-              color: "primary.contrastText",
-              bgcolor: "primary.main",
-            },
-          }}
-        >
-          General
-        </ToggleButton>
-        <ToggleButton
-          value="advanced"
-          sx={{
-            "&.Mui-selected": {
-              color: "primary.contrastText",
-              bgcolor: "primary.main",
-            },
-          }}
-        >
-          Advanced
-        </ToggleButton>
+        <ToggleButton value="general">General</ToggleButton>
+        <ToggleButton value="advanced">Advanced</ToggleButton>
       </ToggleButtonGroup>
 
       {searchMode === "general" ? (
-        <Box
-          component="form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            onSearch();
-          }}
-          sx={{ display: "flex", gap: 1, alignItems: "center" }}
-        >
+        <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
           <TextField
             size="small"
             placeholder="Search by name, email, phone, gender, or birth date..."
@@ -82,24 +55,12 @@ export default function PatientSearch({
             }}
             sx={{ flex: 1 }}
           />
-          <Button
-            variant="contained"
-            size="small"
-            startIcon={<SearchIcon />}
-            type="submit"
-          >
+          <Button variant="contained" onClick={onSearch} size="small" startIcon={<SearchIcon />}>
             Search
           </Button>
         </Box>
       ) : (
-        <Box
-          component="form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            onSearch();
-          }}
-          sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}
-        >
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
           <Box
             sx={{
               display: "grid",
@@ -140,12 +101,7 @@ export default function PatientSearch({
               Clear search
             </Box>
             <Box sx={{ flex: 1 }} />
-            <Button
-              variant="contained"
-              size="small"
-              startIcon={<SearchIcon />}
-              type="submit"
-            >
+            <Button variant="contained" onClick={onSearch} size="small" startIcon={<SearchIcon />}>
               Search
             </Button>
           </Box>
