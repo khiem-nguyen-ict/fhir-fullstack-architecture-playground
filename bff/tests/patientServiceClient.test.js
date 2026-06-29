@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { validatePatientInput } from "../src/services/patientServiceClient.js";
+import { validatePatientInput, sanitizeString, ALLOWED_SORT_FIELDS, ALLOWED_FILTER_FIELDS } from "../src/services/patientServiceClient.js";
 
 describe("validatePatientInput", () => {
   it("passes with valid email and phone", () => {
@@ -72,43 +72,77 @@ describe("validatePatientInput", () => {
     const input = { email: "a".repeat(245) + "@e.com", phone: "5551234567", givenName: "a".repeat(255), familyName: "b".repeat(255) };
     expect(() => validatePatientInput(input)).not.toThrow();
   });
+
+  it("passes with valid birthDate", () => {
+    const input = { email: "test@example.com", phone: "5551234567", birthDate: "1990-01-15" };
+    expect(() => validatePatientInput(input)).not.toThrow();
+  });
+
+  it("fails with invalid birthDate format", () => {
+    const input = { email: "test@example.com", phone: "5551234567", birthDate: "01-15-1990" };
+    expect(() => validatePatientInput(input)).toThrow("Invalid birthDate format");
+  });
 });
 
 describe("sanitizeString helper", () => {
   it("removes control characters from strings", () => {
     const testStr = "test\x00\x1F\x7Fvalue";
-    const sanitized = testStr.replace(/[\x00-\x1F\x7F]/g, "").trim();
-    expect(sanitized).toBe("testvalue");
+    expect(sanitizeString(testStr)).toBe("testvalue");
   });
 
   it("handles empty string", () => {
     const testStr = "";
-    const sanitized = testStr.replace(/[\x00-\x1F\x7F]/g, "").trim();
-    expect(sanitized).toBe("");
+    expect(sanitizeString(testStr)).toBe("");
+  });
+
+  it("handles non-string input", () => {
+    expect(sanitizeString(123)).toBe(123);
+    expect(sanitizeString(null)).toBe(null);
   });
 });
 
-describe("ALLOWED_SORT_FIELDS", () => {
+describe("ALLOWED_SORT_FIELDS constant", () => {
   it("contains expected fields", () => {
-    const fields = ["id", "givenName", "familyName", "email", "birthDate"];
-    expect(fields).toContain("id");
-    expect(fields).toContain("givenName");
-    expect(fields).toContain("familyName");
-    expect(fields).toContain("email");
-    expect(fields).toContain("birthDate");
+    expect(ALLOWED_SORT_FIELDS).toContain("givenName");
+    expect(ALLOWED_SORT_FIELDS).toContain("familyName");
+    expect(ALLOWED_SORT_FIELDS).toContain("email");
+    expect(ALLOWED_SORT_FIELDS).toContain("birthDate");
   });
 });
 
-describe("validation middleware", () => {
-  it("depthLimit rule rejects queries deeper than configured limit", () => {
-    const depthLimit = (maxDepth) => ({
-      Document: {
-        leave(node) {
-          const depth = (node) => node.selectionSet ? node.selectionSet.selections.flatMap(depth) : 0;
-          return depth(node) <= maxDepth;
-        },
-      },
-    });
-    expect(depthLimit(10)).toBeDefined();
+describe("ALLOWED_FILTER_FIELDS constant", () => {
+  it("contains expected filterable fields", () => {
+    expect(ALLOWED_FILTER_FIELDS).toContain("givenName");
+    expect(ALLOWED_FILTER_FIELDS).toContain("familyName");
+    expect(ALLOWED_FILTER_FIELDS).toContain("email");
+    expect(ALLOWED_FILTER_FIELDS).toContain("phone");
+    expect(ALLOWED_FILTER_FIELDS).not.toContain("id");
+    expect(ALLOWED_FILTER_FIELDS).not.toContain("birthDate");
+  });
+});
+describe("listPatients query string serialization", () => {
+  it("uses repeated bare key format for filters (Spring Boot compatible)", async () => {
+    const logs = [];
+    const origDebug = console.debug;
+    console.debug = (...args) => logs.push(args.join(" "));
+
+    const mod = await import("../src/services/patientServiceClient.js");
+    try {
+      await mod.patientServiceClient.listPatients(0, 25, "fullName", "asc", null, ["familyName", "phone"], ["holm", "0568"]);
+    } catch {
+      // node-fetch may fail in test env; we only inspect the URL
+    }
+
+    console.debug = origDebug;
+
+    const debugLog = logs.find((l) => l.includes("query:"));
+    expect(debugLog).toBeDefined();
+    if (debugLog) {
+      const queryString = debugLog.split("query: ")[1];
+      expect(queryString).toContain("filterField=familyName");
+      expect(queryString).toContain("filterField=phone");
+      expect(queryString).toContain("filterValue=holm");
+      expect(queryString).toContain("filterValue=0568");
+    }
   });
 });

@@ -16,33 +16,57 @@ function toGraphPatient(p) {
 
 export const patientQueries = {
   patients: async (_parent, { offset = 0, limit, sortBy, sortDirection, search, filterField, filterValue }) => {
-    const page = await patientServiceClient.listPatients(offset, limit, sortBy, sortDirection, search, filterField, filterValue);
-    return {
-      patients: page.items.map(toGraphPatient),
-      totalCount: page.total,
-    };
+    try {
+      const page = await patientServiceClient.listPatients(offset, limit, sortBy, sortDirection, search, filterField, filterValue);
+      return {
+        patients: page.items.map(toGraphPatient),
+        totalCount: page.total,
+      };
+    } catch (error) {
+      throw new Error(`Failed to fetch patients: ${error.message}`);
+    }
   },
   patient: async (_parent, { id }) => {
-    const patient = await patientServiceClient.getPatient(id);
-    return toGraphPatient(patient);
+    try {
+      const patient = await patientServiceClient.getPatient(id);
+      return toGraphPatient(patient);
+    } catch (error) {
+      throw new Error(`Failed to fetch patient ${id}: ${error.message}`);
+    }
   },
   paginationConfig: async () => {
-    const config = await patientServiceClient.getPaginationConfig();
-    return config;
+    try {
+      const config = await patientServiceClient.getPaginationConfig();
+      return config;
+    } catch (error) {
+      throw new Error(`Failed to fetch pagination config: ${error.message}`);
+    }
   },
 };
 
 export const patientMutations = {
   createPatient: async (_parent, { input }) => {
-    const created = await patientServiceClient.createPatient(input);
-    return toGraphPatient(created);
+    try {
+      const created = await patientServiceClient.createPatient(input);
+      return toGraphPatient(created);
+    } catch (error) {
+      throw new Error(`Failed to create patient: ${error.message}`);
+    }
   },
   updatePatient: async (_parent, { id, input }) => {
-    const updated = await patientServiceClient.updatePatient(id, input);
-    return toGraphPatient(updated);
+    try {
+      const updated = await patientServiceClient.updatePatient(id, input);
+      return toGraphPatient(updated);
+    } catch (error) {
+      throw new Error(`Failed to update patient ${id}: ${error.message}`);
+    }
   },
   deletePatient: async (_parent, { id }) => {
-    await patientServiceClient.deletePatient(id);
-    return true;
+    try {
+      await patientServiceClient.deletePatient(id);
+      return true;
+    } catch (error) {
+      throw new Error(`Failed to delete patient ${id}: ${error.message}`);
+    }
   },
 };

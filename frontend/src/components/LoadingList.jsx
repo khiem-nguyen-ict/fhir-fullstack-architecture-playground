@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 import { Box, CircularProgress } from "@mui/material";
 
 export default function LoadingList({ loading, children, minHeight = 200 }) {
