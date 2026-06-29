@@ -35,7 +35,7 @@ export default function PatientSearch({
         value={searchMode}
         onChange={onModeChange}
         size="small"
-        sx={{ mb: 1 }}
+        sx={{ mb: 2 }}
       >
         <ToggleButton value="general">General</ToggleButton>
         <ToggleButton value="advanced">Advanced</ToggleButton>
