@@ -97,6 +97,14 @@ jobs:
           BFF_URL: http://localhost:4000
           PATIENT_SERVICE_URL: http://localhost:8081
 
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-${{ github.run_id }}
+          path: frontend/playwright-report/
+          retention-days: 30
+
       - name: Stop Docker services
         if: always()
         working-directory: infra
