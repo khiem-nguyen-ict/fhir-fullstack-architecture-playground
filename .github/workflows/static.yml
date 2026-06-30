@@ -5,6 +5,8 @@ on:
     workflows: ["Docker Image CI"]
     types:
       - completed
+    jobs:
+      - e2e-test
 
 permissions:
   contents: read
