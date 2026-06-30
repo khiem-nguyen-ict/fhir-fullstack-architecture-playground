@@ -168,7 +168,7 @@ jobs:
 
   deploy-report:
     needs: e2e-test
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && always() }}
+    if: always()
     runs-on: ubuntu-latest
     environment:
       name: github-pages
