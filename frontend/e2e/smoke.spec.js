@@ -1,7 +1,8 @@
 import { test, expect } from '@playwright/test';
 import { PatientsPage } from './pages/PatientsPage.js';
 import { PatientForm } from './pages/PatientForm.js';
-import { generateRandomPatient, deleteTestPatient } from './testUtils.js';
+import { config } from './config.js';
+import { generateRandomPatient, deleteTestPatient, queryTestPatients } from './testUtils.js';
 
 test.describe.configure({ mode: 'serial' });
 
@@ -37,11 +38,8 @@ test('smoke: patient form creates a new patient @smoke', async ({ page }) => {
   await page.waitForSelector('text=Patient created successfully', { timeout: 5000 });
   
   // Clean up
-  const created = await page.request.post('http://localhost:4000/graphql', {
-    data: JSON.stringify({ query: `{ patients(limit: 1 search: "${testPatient.givenName}") { patients { id } } }` })
-  });
-  const result = await created.json();
-  const patientToDelete = result?.data?.patients?.patients?.[0];
+  const patients = await queryTestPatients(page);
+  const patientToDelete = patients.find(p => p.fullName?.includes(testPatient.givenName));
   if (patientToDelete) {
     await deleteTestPatient(page, patientToDelete.id);
   }
@@ -65,11 +63,8 @@ test('smoke: no console errors on load @smoke', async ({ page }) => {
 test.afterEach(async ({ page }) => {
   // Clean up test patients
   try {
-    const response = await page.request.post('http://localhost:4000/graphql', {
-      data: JSON.stringify({ query: '{ patients(limit: 100) { patients { id fullName } } }' })
-    });
-    const result = await response.json();
-    const testPatients = result.data?.patients?.patients?.filter(p => p.fullName?.includes('Test')) || [];
+    const patients = await queryTestPatients(page);
+    const testPatients = patients.filter(p => p.fullName?.includes('Test'));
     for (const patient of testPatients) {
       await deleteTestPatient(page, patient.id);
     }

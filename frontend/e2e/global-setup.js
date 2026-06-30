@@ -1,4 +1,5 @@
 import { request } from '@playwright/test';
+import { config } from './config.js';
 
 async function waitForService(url, timeout = 60000) {
   const startTime = Date.now();
@@ -20,13 +21,13 @@ async function waitForService(url, timeout = 60000) {
 export default async function globalSetup() {
   console.log('Waiting for services to be ready...');
   
-  await waitForService('http://localhost:8081/actuator/health');
+  await waitForService(`${config.patientServiceUrl}/actuator/health`);
   console.log('✓ patient-service ready');
   
-  await waitForService('http://localhost:4000/graphql');
+  await waitForService(`${config.bffUrl}/graphql`);
   console.log('✓ bff ready');
   
-  await waitForService('http://localhost:5173');
+  await waitForService(config.frontendUrl);
   console.log('✓ frontend ready');
   
   console.log('All services are ready for E2E tests!');

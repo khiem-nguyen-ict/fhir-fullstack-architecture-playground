@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { PatientsPage } from './pages/PatientsPage.js';
-import { deleteTestPatient, generateRandomPatient } from './testUtils.js';
+import { deleteTestPatient, queryTestPatients } from './testUtils.js';
 
 test.describe.configure({ mode: 'serial' });
 
@@ -32,11 +32,8 @@ test('advanced search with field-specific filters', async ({ page }) => {
 
 test.afterEach(async ({ page }) => {
   try {
-    const response = await page.request.post('http://localhost:4000/graphql', {
-      data: JSON.stringify({ query: '{ patients(limit: 100) { patients { id fullName } } }' })
-    });
-    const result = await response.json();
-    const testPatients = result.data?.patients?.patients?.filter(p => p.fullName?.includes('Test')) || [];
+    const patients = await queryTestPatients(page);
+    const testPatients = patients.filter(p => p.fullName?.includes('Test'));
     for (const patient of testPatients) {
       await deleteTestPatient(page, patient.id);
     }

@@ -1,40 +1,7 @@
 import { test, expect } from '@playwright/test';
+import { generateRandomPatient, deleteTestPatient, queryTestPatients } from './testUtils.js';
 
 test.describe.configure({ mode: 'serial' });
-
-const generateRandomPatient = () => {
-  const timestamp = Date.now();
-  return {
-    givenName: `Test${timestamp}`,
-    familyName: `Patient${timestamp}`,
-    gender: 'male',
-    birthDate: '1990-01-01',
-    phone: '555-123-4567',
-    email: `test${timestamp}@example.com`
-  };
-};
-
-const cleanupTestPatients = async (page) => {
-  try {
-    const response = await page.request.post('http://localhost:4000/graphql', {
-      data: JSON.stringify({
-        query: `{ patients(limit: 100) { patients { id fullName } } }`
-      })
-    });
-    const result = await response.json();
-    const testPatients = result.data?.patients?.patients?.filter(p => p.fullName?.includes('Test')) || [];
-    for (const patient of testPatients) {
-      await page.request.post('http://localhost:4000/graphql', {
-        data: JSON.stringify({
-          query: 'mutation DeletePatient($id: ID!) { deletePatient(id: $id) }',
-          variables: { id: patient.id }
-        })
-      });
-    }
-  } catch (e) {
-    // Ignore cleanup errors
-  }
-};
 
 test('renders patient list from API', async ({ page }) => {
   await page.goto('/');
@@ -73,5 +40,13 @@ test('shows loading spinner during API calls', async ({ page }) => {
 });
 
 test.afterEach(async ({ page }, testInfo) => {
-  await cleanupTestPatients(page);
+  try {
+    const patients = await queryTestPatients(page);
+    const testPatients = patients.filter(p => p.fullName?.includes('Test'));
+    for (const patient of testPatients) {
+      await deleteTestPatient(page, patient.id);
+    }
+  } catch (e) {
+    // Ignore cleanup errors
+  }
 });

@@ -4,10 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Run environment'
+        description: 'Run environment (docker or local)'
         required: true
         default: 'docker'
-        type: string
+        type: choice
+        options:
+          - docker
+          - local
 
 jobs:
   e2e:
@@ -29,7 +32,7 @@ jobs:
 
       - name: Install Playwright browsers
         working-directory: frontend
-        run: npx playwright install --with-deps
+        run: npx playwright install --with-deps chromium
 
       - name: Start Docker services
         working-directory: infra
@@ -37,21 +40,18 @@ jobs:
 
       - name: Wait for services
         run: |
-          for i in {1..60}; do
-            curl -s http://localhost:8081/actuator/health && break || sleep 2
-          done
-          for i in {1..60}; do
-            curl -s http://localhost:4000/graphql -X POST -H "Content-Type: application/json" -d '{"query":"{__typename}"}' && break || sleep 2
-          done
-          for i in {1..60}; do
-            curl -s http://localhost:5173 && break || sleep 2
-          done
+          for i in {1..60}; do curl -s http://localhost:8081/actuator/health && break || sleep 2; done
+          for i in {1..60}; do curl -s http://localhost:4000/graphql -X POST -H "Content-Type: application/json" -d '{"query":"{__typename}"}' && break || sleep 2; done
+          for i in {1..60}; do curl -s http://localhost:5173 && break || sleep 2; done
 
       - name: Run E2E tests
         working-directory: frontend
         run: npm run test:e2e
         env:
           CI: true
+          FRONTEND_URL: http://localhost:5173
+          BFF_URL: http://localhost:4000
+          PATIENT_SERVICE_URL: http://localhost:8081
 
       - name: Upload test results
         uses: actions/upload-artifact@v4

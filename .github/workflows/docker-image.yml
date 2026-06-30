@@ -56,7 +56,7 @@ jobs:
         working-directory: ${{ matrix.service.working-directory }}
         if: matrix.service.name != 'patient-service'
 
-smoke-tests:
+  smoke-tests:
     needs: test
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
@@ -92,6 +92,9 @@ smoke-tests:
         run: npm run test:e2e -- --grep @smoke
         env:
           CI: true
+          FRONTEND_URL: http://localhost:5173
+          BFF_URL: http://localhost:4000
+          PATIENT_SERVICE_URL: http://localhost:8081
 
       - name: Stop Docker services
         if: always()

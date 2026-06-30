@@ -96,6 +96,64 @@ npm run dev
 # -> listening on http://localhost:5173
 ```
 
+## E2E Testing
+
+Playwright E2E tests validate the full stack (frontend → BFF → patient-service) against real Docker services.
+
+### Environment Variables
+
+Tests can be configured via environment variables:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `FRONTEND_URL` | `http://localhost:5173` | Frontend application URL |
+| `BFF_URL` | `http://localhost:4000` | GraphQL BFF endpoint |
+| `PATIENT_SERVICE_URL` | `http://localhost:8081` | Patient service health endpoint |
+
+### Run E2E Tests Locally
+
+```bash
+# Terminal 1: Start all services
+cd infra && docker compose up --build
+
+# Terminal 2: Run tests (optional: set custom URLs)
+cd frontend
+npm run test:e2e              # Run all tests
+npm run test:e2e:ui           # Interactive UI mode
+npm run test:e2e:debug        # Debug mode
+npm run test:e2e -- --grep @smoke  # Smoke tests only
+```
+
+### Run E2E Tests Against Remote Services
+
+```bash
+# Set custom URLs (e.g., for staging or production-like environments)
+cd frontend
+FRONTEND_URL=https://your-frontend.example.com \
+BFF_URL=https://your-api.example.com \
+npm run test:e2e
+```
+
+### How Tests Work
+
+- **Smoke tests** (tagged `@smoke`): Run on every PR, verify core functionality (app loads, patient list renders, form submits)
+- **Full E2E suite**: Manual trigger via GitHub Actions workflow dispatch, validates all features
+- Tests clean up after themselves (create/delete test patients)
+- Executes serially (`workers: 1`) to avoid database conflicts
+
+### GitHub Actions
+
+- **Pull Requests**: Smoke tests run automatically after frontend unit tests pass
+- **Manual trigger**: Full E2E suite via Actions tab → "E2E Tests" → Run workflow
+
+### Live URLs (after deploy)
+
+- Frontend + BFF (served together): `https://<bff-service-name>.onrender.com`
+- Patient Service REST API: `https://<patient-service-name>.onrender.com/api/patients`
+- Patient Service FHIR API: `https://<patient-service-name>.onrender.com/fhir/Patient`
+
+GraphQL is available at `https://<bff-service-name>.onrender.com/graphql`.
+
 ## Deploy to Render.com
 
 The repo includes an `infra/render.yaml` blueprint that provisions the full stack
@@ -141,44 +199,6 @@ independent scaling), add a fourth web service in Render:
 
 The frontend Dockerfile will serve the built React app via Vite's preview server.
 
-## E2E Testing
-
-Playwright E2E tests validate the full stack (frontend → BFF → patient-service) against real Docker services.
-
-### Run E2E Tests Locally
-
-```bash
-# Terminal 1: Start all services
-cd infra && docker compose up --build
-
-# Terminal 2: Run tests
-cd frontend
-npm run test:e2e              # Run all tests
-npm run test:e2e:ui           # Interactive UI mode
-npm run test:e2e:debug        # Debug mode
-npm run test:e2e -- --grep @smoke  # Smoke tests only
-```
-
-### How Tests Work
-
-- **Smoke tests** (tagged `@smoke`): Run on every PR, verify core functionality (app loads, patient list renders, form submits)
-- **Full E2E suite**: Manual trigger via GitHub Actions workflow dispatch, validates all features
-- Tests clean up after themselves (create/delete test patients)
-- Executes serially (`workers: 1`) to avoid database conflicts
-
-### GitHub Actions
-
-- **Pull Requests**: Smoke tests run automatically after frontend unit tests pass
-- **Manual trigger**: Full E2E suite via Actions tab → "E2E Tests" → Run workflow
-
-### Live URLs (after deploy)
-
-- Frontend + BFF (served together): `https://<bff-service-name>.onrender.com`
-- Patient Service REST API: `https://<patient-service-name>.onrender.com/api/patients`
-- Patient Service FHIR API: `https://<patient-service-name>.onrender.com/fhir/Patient`
-
-GraphQL is available at `https://<bff-service-name>.onrender.com/graphql`.
-
 ## Live Demo Links
 
 - Live Patient Service: https://patient-service-lzty.onrender.com
@@ -211,13 +231,13 @@ curl http://localhost:8081/fhir/Patient
 
 # GraphQL via the BFF
  curl -X POST http://localhost:4000/graphql \
-   -H 'Content-Type: application/json' \
-   -d '{"query":"{ patients(search: \"jo\") { totalCount patients { id fullName } } }"}'
+  -H 'Content-Type: application/json' \
+  -d '{"query":"{ patients(search: \"jo\") { totalCount patients { id fullName } } }"}'
 
  # GraphQL with advanced filtering
  curl -X POST http://localhost:4000/graphql \
-   -H 'Content-Type: application/json' \
-   -d '{"query":"{ patients(filterField: [\"gender\", \"birthDate\"], filterValue: [\"male\", \"2024\"]) { totalCount patients { id fullName gender birthDate } } }"}'
+  -H 'Content-Type: application/json' \
+  -d '{"query":"{ patients(filterField: [\"gender\", \"birthDate\"], filterValue: [\"male\", \"2024\"]) { totalCount patients { id fullName gender birthDate } } }"}'
 ```
 
 See `docs/architecture.md` for more on how the layers fit together.
@@ -227,9 +247,11 @@ See `docs/architecture.md` for more on how the layers fit together.
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## What is FHIR?
+
 FHIR (Fast Healthcare Interoperability Resources) is a standard for exchanging healthcare information electronically.
 It defines how healthcare information can be exchanged between different systems, regardless of how it is stored.
 Learn more at the [official HL7 FHIR documentation](https://hl7.org/fhir/).
 
 ## How this project demonstrates FHIR
+
 This project demonstrates a common pattern in healthcare applications: a frontend application that communicates with a backend through a Backend-for-Frontend (BFF) layer, which in turn interacts with a service that manages FHIR resources. Specifically, the `patient-service` exposes a FHIR-compliant endpoint (`/fhir/Patient`) that returns patient data in the FHIR JSON format, mimicking a real FHIR server. The BFF (GraphQL) and frontend consume this FHIR-shaped data, illustrating how a real-world application might interact with a FHIR server without the complexity of setting up a full FHIR server.
