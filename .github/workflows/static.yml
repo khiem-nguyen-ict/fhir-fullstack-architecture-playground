@@ -28,7 +28,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: '.'
+          path: frontend/playwright-report/
 
       - name: Deploy to GitHub Pages
         id: deployment
