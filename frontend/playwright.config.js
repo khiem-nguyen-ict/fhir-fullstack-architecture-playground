@@ -25,7 +25,7 @@ export default defineConfig({
   webServer: {
     command: 'cd ../infra && docker compose up --build',
     url: 'http://localhost:5173',
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: true,
     timeout: 120000,
   },
   globalSetup: './e2e/global-setup.js',

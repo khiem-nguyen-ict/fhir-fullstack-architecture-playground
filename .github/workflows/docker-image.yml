@@ -11,7 +11,7 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  test:
+  unit-test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -56,8 +56,8 @@ jobs:
         working-directory: ${{ matrix.service.working-directory }}
         if: matrix.service.name != 'patient-service'
 
-  smoke-tests:
-    needs: test
+  e2e-test:
+    needs: unit-test
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     steps:
@@ -87,7 +87,7 @@ jobs:
           for i in {1..60}; do curl -s http://localhost:4000/graphql -X POST -H "Content-Type: application/json" -d '{"query":"{__typename}"}' && break || sleep 2; done
           for i in {1..60}; do curl -s http://localhost:5173 && break || sleep 2; done
 
-      - name: Run smoke tests
+      - name: Run e2e tests
         working-directory: frontend
         run: npm run test:e2e -- --grep @smoke
         env:
@@ -102,7 +102,7 @@ jobs:
         run: docker compose down -v
 
   build:
-    needs: test
+    needs: [unit-test, e2e-test]
     runs-on: ubuntu-latest
     permissions:
       contents: read
