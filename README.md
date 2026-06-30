@@ -5,6 +5,7 @@
 - [Run the full circle demo (Docker)](#run-the-full-circle-demo-docker)
 - [Run each piece locally (no Docker)](#run-each-piece-locally-no-docker)
 - [E2E Testing](#e2e-testing)
+- [Playwright Test Report](#playwright-test-report)
 - [Deploy to Render.com](#deploy-to-rendercom)
 - [Quick smoke test (curl)](#quick-smoke-test-curl)
 - [License](#license)
@@ -145,6 +146,10 @@ npm run test:e2e
 
 - **Pull Requests**: Smoke tests run automatically after frontend unit tests pass
 - **Manual trigger**: Full E2E suite via Actions tab → "E2E Tests" → Run workflow
+
+### Playwright Test Report
+
+View the latest E2E test results from CI-CD: https://khiem-nguyen-ict.github.io/fhir-fullstack-architecture-playground/
 
 ### Live URLs (after deploy)
 

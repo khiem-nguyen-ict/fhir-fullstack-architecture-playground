@@ -82,13 +82,13 @@ jobs:
 
       - name: Wait for services
         run: |
-          for i in {1..60}; do curl -s http://localhost:8081/actuator/health && break || sleep 2; done
-          for i in {1..60}; do curl -s http://localhost:4000/graphql -X POST -H "Content-Type: application/json" -d '{"query":"{__typename}"}' && break || sleep 2; done
-          for i in {1..60}; do curl -s http://localhost:5173 && break || sleep 2; done
+          for i in {1..60}; do curl -sf http://localhost:8081/health && break || sleep 2; done
+          for i in {1..60}; do curl -sf http://localhost:4000/graphql -X POST -H "Content-Type: application/json" -d '{"query":"{__typename}"}' && break || sleep 2; done
+          for i in {1..60}; do curl -sf http://localhost:5173 && break || sleep 2; done
 
       - name: Run e2e tests
         working-directory: frontend
-        run: npm run test:e2e -- --grep @smoke
+        run: npm run test:e2e
         env:
           CI: true
           FRONTEND_URL: http://localhost:5173
@@ -165,3 +165,33 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           load: false
+
+  deploy-report:
+    needs: e2e-test
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    concurrency:
+      group: "pages"
+      cancel-in-progress: false
+    steps:
+      - name: Download Playwright report artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: "playwright-report/"
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
