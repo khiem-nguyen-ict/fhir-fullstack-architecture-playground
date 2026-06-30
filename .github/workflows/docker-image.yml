@@ -2,9 +2,9 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "**" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "**" ]
 
 env:
   REGISTRY: ghcr.io
@@ -13,6 +13,7 @@ env:
 jobs:
   unit-test:
     runs-on: ubuntu-latest
+    if: github.event_name != 'push' || github.ref != 'refs/heads/main'
     strategy:
       matrix:
         service:
@@ -59,7 +60,7 @@ jobs:
   e2e-test:
     needs: unit-test
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
+    if: github.event_name != 'push' || github.ref != 'refs/heads/main'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -96,14 +97,23 @@ jobs:
           BFF_URL: http://localhost:4000
           PATIENT_SERVICE_URL: http://localhost:8081
 
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-${{ github.run_id }}
+          path: frontend/playwright-report/
+          retention-days: 30
+
       - name: Stop Docker services
         if: always()
         working-directory: infra
         run: docker compose down -v
 
   build:
-    needs: [unit-test, e2e-test]
+    needs: []
     runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     permissions:
       contents: read
       packages: write
