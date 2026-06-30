@@ -19,8 +19,8 @@ jobs:
       - name: Download Playwright report artifact
         uses: actions/download-artifact@v4
         with:
-          name: playwright-report-${{ github.event.workflow_run.id }}
-          path: playwright-report
+          name: playwright-report
+          path: frontend/playwright-report/
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -28,7 +28,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: 'playwright-report'
+          path: "."
 
       - name: Deploy to GitHub Pages
         id: deployment
